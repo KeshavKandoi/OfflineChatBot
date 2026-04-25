@@ -4,6 +4,8 @@ from ollama_client import model
 from langgraph.checkpoint.memory import InMemorySaver  
 from langchain_core.messages import SystemMessage
 from langgraph.graph.message import add_messages
+from long_memory import search_long_memory
+
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
@@ -11,12 +13,28 @@ class State(TypedDict):
 checkpointer = InMemorySaver()
 
 def call_llm(state: State) -> State:
-    system = SystemMessage(
-        content="You must remember and use previous conversation messages. "
-                "If user asks about past information, answer using chat history."
+
+    last_message = state["messages"][-1].content
+
+
+    past_context = search_long_memory(last_message)
+
+
+    system_content = (
+        "You are a helpful assistant. "
+        "Remember everything the user tells you in this conversation."
     )
+
+  
+    if past_context:
+        context_text = "\n".join(past_context)
+        system_content += (
+            f"\n\nRelevant context from past conversations:\n{context_text}"
+        )
+
+    system = SystemMessage(content=system_content)
     response = model.invoke([system] + state["messages"])
-    return {"messages":[response]}
+    return {"messages": [response]}
 
 def build_graph():
 
