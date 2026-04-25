@@ -36,11 +36,7 @@ def chat (user:User):
     config={"configurable": {"thread_id": user.session_id}}
     
     result = graph.invoke(
-    {
-        "messages": [
-            {"role": "user", "content": user.message}
-        ]
-    },
+    {"messages": [HumanMessage(content=user.message)]},
     config=config
 )
     return {"reply": result["messages"][-1].content}
