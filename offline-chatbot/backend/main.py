@@ -2,12 +2,14 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from graph import build_graph
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage,SystemMessage
 from database import create_tables, get_db
 from models import Session, Message
 from sqlalchemy.orm import Session as DBSession
 from datetime import datetime
-from long_memory import save_to_long_memory
+from ollama_client import model
+from long_memory import save_to_long_memory, search_long_memory
+from fastapi.responses import StreamingResponse
 
 app = FastAPI()
 
@@ -72,3 +74,39 @@ def chat(req: ChatRequest, db: DBSession = Depends(get_db)):
     save_to_long_memory(req.session_id, "assistant", reply)
 
     return {"reply": reply}
+
+
+def stream(messages: list, req: ChatRequest, db: DBSession):
+    full_reply = []
+
+    for chunk in model.stream(messages):
+        token = chunk.content
+        if token:
+            full_reply.append(token)
+            yield token
+
+
+    reply = "".join(full_reply)
+    db.add(Message(session_id=req.session_id, role="user", content=req.message, created_at=datetime.utcnow()))
+    db.add(Message(session_id=req.session_id, role="assistant", content=reply, created_at=datetime.utcnow()))
+    db.commit()
+
+    save_to_long_memory(req.session_id, "user", req.message)
+    save_to_long_memory(req.session_id, "assistant", reply)
+
+
+@app.post("/chat/stream")
+async def chat_stream(req: ChatRequest, db: DBSession = Depends(get_db)):
+    past_context = search_long_memory(req.message)
+
+    system_content = (
+        "You are a helpful assistant. "
+        "Remember everything the user tells you in this conversation."
+    )
+    if past_context:
+        context_text = "\n".join(past_context)
+        system_content += f"\n\nRelevant context from past conversations:\n{context_text}"
+
+    messages = [SystemMessage(content=system_content), HumanMessage(content=req.message)]
+
+    return StreamingResponse(stream(messages, req, db), media_type="text/plain")
