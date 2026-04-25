@@ -10,8 +10,12 @@ from datetime import datetime
 from ollama_client import model
 from long_memory import save_to_long_memory, search_long_memory
 from fastapi.responses import StreamingResponse
-
+import os
+import shutil
+from fastapi import UploadFile, File
+from rag import process_pdf, process_txt, process_docx, process_image, search_rag
 app = FastAPI()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -110,3 +114,37 @@ async def chat_stream(req: ChatRequest, db: DBSession = Depends(get_db)):
     messages = [SystemMessage(content=system_content), HumanMessage(content=req.message)]
 
     return StreamingResponse(stream(messages, req, db), media_type="text/plain")
+
+
+UPLOAD_DIR = "./uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+
+    # Save file to disk
+    with open(file_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    ext = file.filename.split(".")[-1].lower()
+
+    if ext == "pdf":
+        count = process_pdf(file_path, file.filename)
+        return {"message": f"PDF processed, {count} chunks saved"}
+    elif ext == "txt":
+        count = process_txt(file_path, file.filename)
+        return {"message": f"TXT processed, {count} chunks saved"}
+    elif ext == "docx":
+        count = process_docx(file_path, file.filename)
+        return {"message": f"DOCX processed, {count} chunks saved"}
+    elif ext in ["jpg", "jpeg", "png"]:
+        description = process_image(file_path, file.filename)
+        return {"message": "Image analyzed", "description": description}
+    else:
+        return {"message": "Unsupported file type"}
+
+@app.get("/rag/search/{query}")
+def rag_search(query: str):
+    results = search_rag(query)
+    return {"results": results}
