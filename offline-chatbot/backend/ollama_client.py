@@ -1,8 +1,5 @@
 from langchain_ollama import ChatOllama
 
-model = ChatOllama(model="qwen3.5:latest")
+model = ChatOllama(model="qwen3.5:latest",stream=True)
 
-# def get_reply(message):
-#     response = model.invoke(message)
-#     return response.content
 
