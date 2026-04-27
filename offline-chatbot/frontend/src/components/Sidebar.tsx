@@ -1,13 +1,31 @@
-import  type { ChatSession } from '../types'
+import { useState } from 'react'
+import type { ChatSession } from '../types'
 
 interface Props {
   sessions: ChatSession[]
   activeId: string | null
   onSelect: (id: string) => void
   onNew: () => void
+  onDelete: (id: string) => void
+  onRename: (id: string, title: string) => void
 }
 
-export default function Sidebar({ sessions, activeId, onSelect, onNew }: Props) {
+export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename }: Props) {
+  const [editing, setEditing] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
+
+  function startEdit(s: ChatSession) {
+    setEditing(s.id)
+    setEditValue(s.title)
+  }
+
+  function saveEdit(id: string) {
+    if (editValue.trim()) {
+      onRename(id, editValue.trim())
+    }
+    setEditing(null)
+  }
+
   return (
     <div style={{
       width: '260px',
@@ -18,7 +36,6 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew }: Props) 
       display: 'flex',
       flexDirection: 'column',
     }}>
-      {/* Header */}
       <div style={{ padding: '20px 16px 12px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>
           Offline AI
@@ -38,7 +55,6 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew }: Props) 
         </button>
       </div>
 
-      {/* Sessions list */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
         {sessions.length === 0 && (
           <div style={{ padding: '20px 8px', color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center' }}>
@@ -48,7 +64,6 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew }: Props) 
         {sessions.map(s => (
           <div
             key={s.id}
-            onClick={() => onSelect(s.id)}
             style={{
               padding: '10px 12px',
               borderRadius: '8px',
@@ -56,20 +71,83 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew }: Props) 
               marginBottom: '2px',
               background: activeId === s.id ? 'var(--bg-hover)' : 'transparent',
               borderLeft: activeId === s.id ? '2px solid var(--accent)' : '2px solid transparent',
-              transition: 'all 0.15s'
+              transition: 'all 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              position: 'relative'
             }}
             onMouseEnter={e => { if (activeId !== s.id) e.currentTarget.style.background = 'var(--bg-tertiary)' }}
             onMouseLeave={e => { if (activeId !== s.id) e.currentTarget.style.background = 'transparent' }}
           >
-            <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {s.title}
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              {new Date(s.created_at).toLocaleDateString()}
-            </div>
+            {editing === s.id ? (
+              <input
+                value={editValue}
+                onChange={e => setEditValue(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && saveEdit(s.id)}
+                onBlur={() => saveEdit(s.id)}
+                autoFocus
+                style={{
+                  flex: 1,
+                  background: 'var(--bg-primary)',
+                  border: '1px solid var(--accent)',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  fontSize: '13px',
+                  color: 'var(--text-primary)',
+                  outline: 'none'
+                }}
+              />
+            ) : (
+              <>
+                <div onClick={() => onSelect(s.id)} style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {s.title}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    {new Date(s.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="chat-actions" style={{ display: 'flex', gap: '4px', opacity: 0 }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); startEdit(s) }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      padding: '2px 4px'
+                    }}
+                    title="Rename"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); if (confirm('Delete this chat?')) onDelete(s.id) }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--danger)',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      padding: '2px 4px'
+                    }}
+                    title="Delete"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>
+      <style>{`
+        div:hover .chat-actions {
+          opacity: 1 !important;
+        }
+      `}</style>
     </div>
   )
 }
