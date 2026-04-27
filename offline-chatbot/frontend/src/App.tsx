@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import type { ChatSession, Message } from './types'
-import { createSession, getSessions, getMessages } from './api'
+import { createSession, getSessions, getMessages, deleteSession, updateSessionTitle } from './api'
 import Sidebar from './components/Sidebar'
 import ChatWindow from './components/ChatWindow'
 
 export default function App() {
- 
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -33,6 +32,20 @@ export default function App() {
     setMessages(data)
   }
 
+  async function handleDelete(id: string) {
+    await deleteSession(id)
+    if (activeId === id) {
+      setActiveId(null)
+      setMessages([])
+    }
+    await loadSessions()
+  }
+
+  async function handleRename(id: string, title: string) {
+    await updateSessionTitle(id, title)
+    await loadSessions()
+  }
+
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
       <Sidebar
@@ -40,6 +53,8 @@ export default function App() {
         activeId={activeId}
         onSelect={handleSelect}
         onNew={handleNew}
+        onDelete={handleDelete}
+        onRename={handleRename}
       />
       <ChatWindow
         sessionId={activeId}
