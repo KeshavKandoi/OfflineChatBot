@@ -7,9 +7,10 @@ import FileUpload from './FileUpload'
 interface Props {
   sessionId: string | null
   initialMessages: Message[]
+  onAutoTitle?: (sessionId: string, firstMessage: string) => void
 }
 
-export default function ChatWindow({ sessionId, initialMessages }: Props) {
+export default function ChatWindow({ sessionId, initialMessages, onAutoTitle }: Props) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
@@ -18,6 +19,8 @@ export default function ChatWindow({ sessionId, initialMessages }: Props) {
   const [attachedPreview, setAttachedPreview] = useState<string | null>(null)
   const [uploadStatus, setUploadStatus] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const userScrolled = useRef(false)
 
   useEffect(() => {
     setMessages(initialMessages)
@@ -25,7 +28,9 @@ export default function ChatWindow({ sessionId, initialMessages }: Props) {
   }, [sessionId, initialMessages])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (!userScrolled.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages, streamingText])
 
   function handleFileSelect(file: File | null, preview: string | null) {
@@ -41,7 +46,37 @@ export default function ChatWindow({ sessionId, initialMessages }: Props) {
   }
 
   function handleEdit(id: number, newContent: string) {
-    setMessages(prev => prev.map(m => m.id === id ? { ...m, content: newContent } : m))
+    // Update the message content
+    setMessages(prev => {
+      const updated = prev.map(m => m.id === id ? { ...m, content: newContent } : m)
+      // Remove all messages after the edited message
+      const idx = updated.findIndex(m => m.id === id)
+      return updated.slice(0, idx + 1)
+    })
+    // Resend to AI
+    if (sessionId) {
+      setStreaming(true)
+      setStreamingText('')
+      let fullText = ''
+      streamChat(
+        newContent,
+        sessionId,
+        (chunk) => { fullText += chunk; setStreamingText(fullText) },
+        () => {
+          setMessages(msgs => [...msgs, {
+            id: Date.now() + 1,
+            session_id: sessionId,
+            role: 'assistant',
+            content: fullText,
+            created_at: new Date().toISOString()
+          }])
+          setStreamingText('')
+          setStreaming(false)
+        },
+        false,
+        ''
+      )
+    }
   }
 
   async function send() {
@@ -81,7 +116,13 @@ export default function ChatWindow({ sessionId, initialMessages }: Props) {
       created_at: new Date().toISOString()
     }
 
+    // Auto-title on first message (check BEFORE adding to messages)
+    const isFirstMessage = messages.length === 0
+    userScrolled.current = false
     setMessages(prev => [...prev, userMsg])
+    if (isFirstMessage && sessionId && onAutoTitle) {
+      onAutoTitle(sessionId, input.trim() || uploadedFilename)
+    }
     setInput('')
     setAttachedFile(null)
     setAttachedPreview(null)
@@ -126,7 +167,14 @@ export default function ChatWindow({ sessionId, initialMessages }: Props) {
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh' }}>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 32px' }}>
+      <div
+        ref={messagesContainerRef}
+        onScroll={(e) => {
+          const el = e.currentTarget
+          const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60
+          userScrolled.current = !isAtBottom
+        }}
+        style={{ flex: 1, overflowY: 'auto', padding: '24px 32px' }}>
         {messages.length === 0 && !streamingText && (
           <div style={{ textAlign: 'center', marginTop: '80px', color: 'var(--text-muted)' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>✦</div>
@@ -255,18 +303,25 @@ export default function ChatWindow({ sessionId, initialMessages }: Props) {
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <FileUpload onFileSelect={handleFileSelect} />
 
-          <input
+          <textarea
             value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
+            onChange={e => {
+              setInput(e.target.value)
+              e.target.style.height = 'auto'
+              e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'
+            }}
+            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())}
             placeholder={attachedFile
               ? 'Ask about this file or press Send...'
-              : 'Type a message...'}
+              : 'Type a message.'}
+            rows={1}
             style={{
               flex: 1, padding: '12px 16px', borderRadius: '12px',
               background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
               color: 'var(--text-primary)', fontSize: '14px', outline: 'none',
-              fontFamily: 'DM Sans, sans-serif', transition: 'border-color 0.15s'
+              fontFamily: 'DM Sans, sans-serif', transition: 'border-color 0.15s',
+              resize: 'none', overflow: 'hidden', lineHeight: '1.5',
+              minHeight: '46px', maxHeight: '160px'
             }}
             onFocus={e => e.target.style.borderColor = 'var(--accent)'}
             onBlur={e => e.target.style.borderColor = 'var(--border)'}

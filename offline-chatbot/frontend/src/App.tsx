@@ -16,6 +16,7 @@ export default function App() {
 
   const [user, setUser] = useState<User | null>(null)
   const [sessions, setSessions] = useState<ChatSession[]>([])
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
 
@@ -76,6 +77,12 @@ export default function App() {
     await updateSessionTitle(id, title)
     await loadSessions()
   }
+
+  async function handleAutoTitle(sessionId: string, firstMessage: string) {
+    const title = firstMessage.trim().slice(0, 40) + (firstMessage.length > 40 ? '...' : '')
+    await updateSessionTitle(sessionId, title)
+    await loadSessions()
+  }
   
 
   // Show login if not logged in
@@ -84,8 +91,21 @@ export default function App() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
-      <Sidebar
+    <div style={{ display: 'flex', height: '100vh', width: '100%', position: 'relative' }}>
+      {/* Sidebar toggle button */}
+      <button
+        onClick={() => setSidebarOpen(o => !o)}
+        style={{
+          position: 'fixed', top: '14px', left: sidebarOpen ? '220px' : '12px',
+          zIndex: 200, width: '28px', height: '28px',
+          background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+          borderRadius: '8px', cursor: 'pointer', fontSize: '14px',
+          color: 'var(--text-secondary)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center',
+          transition: 'left 0.25s ease'
+        }}
+      >{sidebarOpen ? '←' : '→'}</button>
+      {sidebarOpen && <Sidebar
         sessions={sessions}
         activeId={activeId}
         onSelect={handleSelect}
@@ -94,10 +114,11 @@ export default function App() {
         onRename={handleRename}
         user={user}
         onLogout={handleLogout}
-      />
+      />}
       <ChatWindow
         sessionId={activeId}
         initialMessages={messages}
+        onAutoTitle={handleAutoTitle}
       />
     </div>
   )
