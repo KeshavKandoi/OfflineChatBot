@@ -25,7 +25,7 @@ rag_store = Chroma(
 
 
 # Vision model for images
-vision_model = ChatOllama(model="llava")
+vision_model = ChatOllama(model="llava:7b")
 
 
 # Text splitter
@@ -125,7 +125,14 @@ def process_image(file_path: str, filename: str):
         image_data = base64.b64encode(f.read()).decode("utf-8")
 
     message = HumanMessage(content=[
-        {"type": "text", "text": "Describe this image in detail."},
+       {"type": "text", "text": (
+            "Analyze the actual content of this image in detail. "
+            "If it contains a diagram, chart, architecture, code, or technical content, "
+            "explain what it shows — components, labels, connections, flow, and purpose. "
+            "If it contains text, extract and explain it. "
+            "Do NOT describe file metadata, screenshot borders, desktop, or timestamps. "
+            "Focus entirely on the subject matter inside the image."
+        )},
         {"type": "image_url", "image_url": f"data:image/jpeg;base64,{image_data}"}
     ])
 
@@ -146,7 +153,7 @@ def process_image(file_path: str, filename: str):
 
 
 # ── SEARCH ──
-def search_rag(query: str, n_results: int = 4):
+def search_rag(query: str, n_results: int = 6):
     try:
         results = rag_store.similarity_search(query, k=n_results)
 
