@@ -39,7 +39,7 @@ function modelsExist() {
   try {
     const entries = fs.readdirSync(ollamaModelsPath, { recursive: true })
     const hasQwen = entries.some(e => e.toString().includes('qwen'))
-    const hasLlava = entries.some(e => e.toString().includes('llava'))
+    const hasLlava = entries.some(e => e.toString().includes('minicpm-v'))
     return hasQwen && hasLlava
   } catch {
     return false
@@ -192,7 +192,7 @@ function createWindow() {
 // ── Download models via bundled ollama ────────────────────────
 async function downloadModels(win) {
   const ollamaPath = getOllamaPath()
-  const models = ['qwen:7b', 'llava:7b', 'nomic-embed-text']
+  const models = ['qwen2.5:7b', 'minicpm-v', 'nomic-embed-text']
 
   for (const model of models) {
     console.log(`[Electron] Downloading ${model}...`)
