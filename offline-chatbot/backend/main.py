@@ -185,7 +185,7 @@
 #     return {"error": "Session not found"}
 
 
-
+import bcrypt
 from fastapi import FastAPI, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -193,7 +193,8 @@ from pydantic import BaseModel
 from graph import build_graph
 from langchain_core.messages import HumanMessage, SystemMessage
 from database import create_tables, get_db
-from models import Session, Message
+
+from models import Session, Message, User
 from sqlalchemy.orm import Session as DBSession
 from datetime import datetime
 from ollama_client import model
@@ -385,3 +386,82 @@ def rag_search(query: str):
 
 
 
+# ── Auth Models ──────────────────────────────────────────────
+class SignupRequest(BaseModel):
+    name: str
+    username: str
+    email: str   
+    password: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+# ── Signup ────────────────────────────────────────────────────
+@app.post("/auth/signup")
+def signup(req: SignupRequest, db: DBSession = Depends(get_db)):
+    existing = db.query(User).filter(User.username == req.username).first()
+    if existing:
+        return {"error": "Username already exists"}
+
+    # Check email too
+    existing_email = db.query(User).filter(User.email == req.email).first()
+    if existing_email:
+        return {"error": "Email already registered"}
+
+    password_hash = bcrypt.hashpw(
+        req.password.encode('utf-8'),
+        bcrypt.gensalt()
+    ).decode('utf-8')
+
+    user = User(
+        name=req.name,
+        username=req.username,
+        email=req.email,        # ← add this
+        password_hash=password_hash,
+        created_at=datetime.utcnow()
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "message": "Account created successfully",
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "username": user.username,
+            "email": user.email    # ← add this
+        }
+    }
+
+# ── Login ─────────────────────────────────────────────────────
+@app.post("/auth/login")
+def login(req: LoginRequest, db: DBSession = Depends(get_db)):
+    # Find user by email
+    user = db.query(User).filter(User.email == req.email).first()
+    if not user:
+        return {"error": "Invalid email or password"}
+
+    if not bcrypt.checkpw(
+        req.password.encode('utf-8'),
+        user.password_hash.encode('utf-8')
+    ):
+        return {"error": "Invalid email or password"}
+
+    return {
+        "message": "Login successful",
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "username": user.username,
+            "email": user.email
+        }
+    }
+
+# ── Get current user sessions ─────────────────────────────────
+@app.get("/sessions/user/{user_id}")
+def get_user_sessions(user_id: int, db: DBSession = Depends(get_db)):
+    return db.query(Session).filter(
+        Session.user_id == user_id
+    ).order_by(Session.created_at.desc()).all()
