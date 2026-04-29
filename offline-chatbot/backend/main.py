@@ -331,7 +331,16 @@ def stream_graph(req: ChatRequest, system_content: str, db: DBSession):
 @app.post("/chat/stream")
 async def chat_stream(req: ChatRequest, db: DBSession = Depends(get_db)):
     # Only use RAG if user actually uploaded a file with this message
-    rag_context = search_rag(req.filename if req.filename else req.message) if req.has_file else []
+    if req.has_file and req.filename:
+        ext = req.filename.split(".")[-1].lower()
+        if ext in ["jpg", "jpeg", "png"]:
+            rag_context = search_rag(req.filename, n_results=1)
+            if not rag_context:
+                rag_context = search_rag("image diagram screenshot", n_results=3)
+        else:
+            rag_context = search_rag(req.filename if req.filename else req.message)
+    else:
+        rag_context = []
 
     system_content = (
         "You are a helpful assistant with memory. "
@@ -342,9 +351,10 @@ async def chat_stream(req: ChatRequest, db: DBSession = Depends(get_db)):
     if rag_context:
         rag_text = "\n".join(rag_context)
         system_content += (
-            f"\n\nThe user JUST uploaded a file in this message. "
-            f"This is the content extracted from that file RIGHT NOW:\n{rag_text}"
-            f"\n\nAnswer based on THIS file only. Ignore any previous file descriptions."
+            f"\n\nThe user JUST uploaded an image file called '{req.filename}'. "
+            f"Here is the detailed analysis of that image:\n{rag_text}"
+            f"\n\nAnswer the user's question based on this image analysis. "
+            f"Do NOT say you cannot see images. The image has already been analyzed and the description is above."
         )
 
     return StreamingResponse(
