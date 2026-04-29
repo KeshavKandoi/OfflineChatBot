@@ -1,6 +1,6 @@
 # from langgraph.graph import StateGraph, START, END
 # from typing import TypedDict, Annotated
-# from ollama_client import model
+# from ollama_client import get_model
 # from langgraph.checkpoint.memory import InMemorySaver  
 # from langchain_core.messages import SystemMessage
 # from langgraph.graph.message import add_messages
@@ -32,7 +32,7 @@
 #         system_content += f"\n\nRelevant context from uploaded documents:\n{rag_text}"
 
 #     system = SystemMessage(content=system_content)
-#     response = model.invoke([system] + state["messages"])
+#     response = get_model(last_message).invoke([system] + state["messages"])
 #     return {"messages": [response]}
 
 
@@ -51,7 +51,7 @@
 
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated
-from ollama_client import model
+from ollama_client import get_model
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.message import add_messages
@@ -78,7 +78,7 @@ def call_llm(state: State) -> State:
         system_content += f"\n\nWhat the user has told you in past conversations:\n{context_text}"
 
     system = SystemMessage(content=system_content)
-    response = model.invoke([system] + state["messages"])
+    response = get_model(last_message).invoke([system] + state["messages"])
     return {"messages": [response]}
 
 def build_graph():
