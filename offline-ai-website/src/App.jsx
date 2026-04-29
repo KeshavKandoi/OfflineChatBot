@@ -346,7 +346,7 @@ export default function App() {
         </p>
 
         <a
-          href="https://github.com/yourusername/offline-ai/releases/latest/download/Offline-AI-1.0.0-arm64.dmg"
+          href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v1.0.0/Offline%20AI-1.0.0-arm64.dmg"
           className="glow-btn"
           style={{
             padding: '18px 40px',
