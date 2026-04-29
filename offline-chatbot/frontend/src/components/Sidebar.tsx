@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import type { ChatSession } from '../types'
 
+interface User {
+  id: number
+  name: string
+  username: string
+}
+
 interface Props {
   sessions: ChatSession[]
   activeId: string | null
@@ -8,9 +14,11 @@ interface Props {
   onNew: () => void
   onDelete: (id: string) => void
   onRename: (id: string, title: string) => void
+  user: User
+  onLogout: () => void
 }
 
-export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename }: Props) {
+export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename, user, onLogout }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
 
@@ -36,6 +44,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
       display: 'flex',
       flexDirection: 'column',
     }}>
+      {/* Header */}
       <div style={{ padding: '20px 16px 12px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>
           Offline AI
@@ -55,6 +64,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
         </button>
       </div>
 
+      {/* Sessions list */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
         {sessions.length === 0 && (
           <div style={{ padding: '20px 8px', color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center' }}>
@@ -111,42 +121,70 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
                 <div className="chat-actions" style={{ display: 'flex', gap: '4px', opacity: 0 }}>
                   <button
                     onClick={(e) => { e.stopPropagation(); startEdit(s) }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-secondary)',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      padding: '2px 4px'
-                    }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '14px', padding: '2px 4px' }}
                     title="Rename"
-                  >
-                    ✎
-                  </button>
+                  >✎</button>
                   <button
                     onClick={(e) => { e.stopPropagation(); if (confirm('Delete this chat?')) onDelete(s.id) }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--danger)',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      padding: '2px 4px'
-                    }}
+                    style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '14px', padding: '2px 4px' }}
                     title="Delete"
-                  >
-                    ✕
-                  </button>
+                  >✕</button>
                 </div>
               </>
             )}
           </div>
         ))}
       </div>
+
+      {/* User info + Logout at bottom */}
+      <div style={{
+        padding: '12px 16px',
+        borderTop: '1px solid var(--border)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+      }}>
+        {/* Avatar */}
+        <div style={{
+          width: '32px', height: '32px',
+          borderRadius: '50%',
+          background: 'var(--accent)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '13px', fontWeight: 700, color: '#fff',
+          flexShrink: 0
+        }}>
+          {user.name.charAt(0).toUpperCase()}
+        </div>
+
+        {/* Name + username */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {user.name}
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+            @{user.username}
+          </div>
+        </div>
+
+        {/* Logout button */}
+        <button
+          onClick={() => { if (confirm('Log out?')) onLogout() }}
+          title="Logout"
+          style={{
+            background: 'none', border: 'none',
+            color: 'var(--text-muted)', cursor: 'pointer',
+            fontSize: '16px', padding: '4px',
+            borderRadius: '6px', transition: 'all 0.15s'
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--danger)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+        >
+          ⏻
+        </button>
+      </div>
+
       <style>{`
-        div:hover .chat-actions {
-          opacity: 1 !important;
-        }
+        div:hover .chat-actions { opacity: 1 !important; }
       `}</style>
     </div>
   )
