@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, sans-serif;
+      background: #0d0d1a;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      -webkit-app-region: drag;
+    }
+    .icon { font-size: 64px; margin-bottom: 20px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    p { color: #888; font-size: 14px; margin-bottom: 40px; text-align: center; }
+    .model-list { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+    .model-item { background: #1a1a2e; border-radius: 12px; padding: 16px; }
+    .model-name { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .progress-bar {
+      height: 6px; background: #2a2a3e;
+      border-radius: 3px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: #7c3aed;
+      border-radius: 3px; width: 0%;
+      transition: width 0.3s ease;
+    }
+    .status { font-size: 12px; color: #888; margin-top: 6px; }
+    .footer { margin-top: 40px; font-size: 12px; color: #555; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="icon">🧠</div>
+  <h1>Setting up Offline AI</h1>
+  <p>Downloading AI models — this only happens once.<br>Please keep the app open.</p>
+
+  <div class="model-list">
+    <div class="model-item" id="model-qwen">
+      <div class="model-name">🤖 qwen:7b — Chat Model (4.5 GB)</div>
+      <div class="progress-bar"><div class="progress-fill" id="fill-qwen"></div></div>
+      <div class="status" id="status-qwen">Waiting...</div>
+    </div>
+    <div class="model-item" id="model-llava">
+      <div class="model-name">👁 llava:7b — Vision Model (4.7 GB)</div>
+      <div class="progress-bar"><div class="progress-fill" id="fill-llava"></div></div>
+      <div class="status" id="status-llava">Waiting...</div>
+    </div>
+    <div class="model-item" id="model-nomic">
+      <div class="model-name">🔍 nomic-embed-text — Memory (274 MB)</div>
+      <div class="progress-bar"><div class="progress-fill" id="fill-nomic"></div></div>
+      <div class="status" id="status-nomic">Waiting...</div>
+    </div>
+  </div>
+
+  <div class="footer">Your data never leaves your device 🔒</div>
+
+  <script>
+    const { ipcRenderer } = require('electron')
+    
+    const modelMap = {
+      'qwen:7b': 'qwen',
+      'llava:7b': 'llava',
+      'nomic-embed-text': 'nomic'
+    }
+
+    ipcRenderer.on('download-progress', (event, { model, text }) => {
+      const key = modelMap[model]
+      if (!key) return
+
+      const fill = document.getElementById(`fill-${key}`)
+      const status = document.getElementById(`status-${key}`)
+
+      // Parse progress from ollama output
+      const match = text.match(/(\d+)%/)
+      if (match) {
+        fill.style.width = match[1] + '%'
+        status.textContent = `Downloading... ${match[1]}%`
+      } else if (text.includes('success') || text.includes('complete')) {
+        fill.style.width = '100%'
+        status.textContent = '✅ Done!'
+      } else if (text.trim()) {
+        status.textContent = text.trim().slice(0, 60)
+      }
+    })
+  </script>
+</body>
+</html>
