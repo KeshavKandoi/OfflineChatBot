@@ -25,7 +25,7 @@ rag_store = Chroma(
 
 
 # Vision model for images
-vision_model = ChatOllama(model="llava:7b")
+vision_model = ChatOllama(model="minicpm-v")
 
 
 # Text splitter
@@ -121,6 +121,8 @@ def process_docx(file_path: str, filename: str):
 
 # ── IMAGE ──
 def process_image(file_path: str, filename: str):
+    ext = file_path.lower().split(".")[-1]
+    mime = "image/png" if ext == "png" else "image/jpeg" if ext in ["jpg", "jpeg"] else "image/png"
     with open(file_path, "rb") as f:
         image_data = base64.b64encode(f.read()).decode("utf-8")
 
@@ -133,7 +135,7 @@ def process_image(file_path: str, filename: str):
             "Do NOT describe file metadata, screenshot borders, desktop, or timestamps. "
             "Focus entirely on the subject matter inside the image."
         )},
-        {"type": "image_url", "image_url": f"data:image/jpeg;base64,{image_data}"}
+        {"type": "image_url", "image_url": f"data:{mime};base64,{image_data}"}
     ])
 
     response = vision_model.invoke([message])
