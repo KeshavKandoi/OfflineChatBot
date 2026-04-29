@@ -4,17 +4,48 @@ import type { ChatSession, Message } from './types'
 import { createSession, getSessions, getMessages, deleteSession, updateSessionTitle } from './api'
 import Sidebar from './components/Sidebar'
 import ChatWindow from './components/ChatWindow'
+import Login from './Login'
+
+interface User {
+  id: number
+  name: string
+  username: string
+}
 
 export default function App() {
+
+  const [user, setUser] = useState<User | null>(null)
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
 
-  useEffect(() => { loadSessions() }, [])
+  // Check if user is already logged in
+  useEffect(() => {
+    const saved = localStorage.getItem('user')
+    if (saved) {
+      setUser(JSON.parse(saved))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (user) loadSessions()
+  }, [user])
 
   async function loadSessions() {
     const data = await getSessions()
     setSessions(data)
+  }
+
+  async function handleLogin(loggedInUser: User) {
+    setUser(loggedInUser)
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('user')
+    setUser(null)
+    setSessions([])
+    setActiveId(null)
+    setMessages([])
   }
 
   async function handleNew() {
@@ -45,6 +76,12 @@ export default function App() {
     await updateSessionTitle(id, title)
     await loadSessions()
   }
+  
+
+  // Show login if not logged in
+  if (!user) {
+    return <Login onLogin={handleLogin} />
+  }
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
@@ -55,6 +92,8 @@ export default function App() {
         onNew={handleNew}
         onDelete={handleDelete}
         onRename={handleRename}
+        user={user}
+        onLogout={handleLogout}
       />
       <ChatWindow
         sessionId={activeId}
@@ -62,4 +101,5 @@ export default function App() {
       />
     </div>
   )
+  
 }
