@@ -9,6 +9,8 @@ let setupWindow
 let backendProcess
 let ollamaProcess
 
+const isWin = process.platform === 'win32'
+
 // ── Get correct paths ─────────────────────────────────────────
 function getResourcePath(relativePath) {
   if (app.isPackaged) {
@@ -20,15 +22,19 @@ function getResourcePath(relativePath) {
   }
   return path.join(__dirname, relativePath)
 }
+
 // ── Get bundled Ollama binary path ────────────────────────────
 function getOllamaPath() {
-  return getResourcePath('binaries/mac/ollama')
+  const binaryName = isWin ? 'ollama.exe' : 'ollama'
+  const platform = isWin ? 'win' : 'mac'
+  return getResourcePath(`binaries/${platform}/${binaryName}`)
 }
 
 // ── Check if models are already downloaded ────────────────────
 function modelsExist() {
+  const homeDir = isWin ? process.env.USERPROFILE : process.env.HOME
   const ollamaModelsPath = path.join(
-    process.env.HOME, '.ollama', 'models', 'manifests', 'registry.ollama.ai'
+    homeDir, '.ollama', 'models', 'manifests', 'registry.ollama.ai'
   )
   try {
     const entries = fs.readdirSync(ollamaModelsPath, { recursive: true })
@@ -40,13 +46,34 @@ function modelsExist() {
   }
 }
 
+// ── Kill process on port 8000 ─────────────────────────────────
+function killPort8000() {
+  try {
+    if (isWin) {
+      execSync('for /f "tokens=5" %a in (\'netstat -aon ^| findstr :8000\') do taskkill /F /PID %a', { shell: true })
+    } else {
+      execSync('lsof -ti:8000 | xargs kill -9')
+    }
+  } catch (e) {}
+}
+
+// ── Kill existing Ollama ──────────────────────────────────────
+function killOllama() {
+  try {
+    if (isWin) {
+      execSync('taskkill /IM ollama.exe /F')
+    } else {
+      execSync('pkill ollama')
+    }
+  } catch (e) {}
+}
+
 // ── Start Ollama using bundled binary ─────────────────────────
 function startOllama() {
   console.log('[Electron] Starting bundled Ollama...')
   const ollamaPath = getOllamaPath()
 
-  // Kill any existing ollama
-  try { execSync('pkill ollama') } catch (e) {}
+  killOllama()
 
   ollamaProcess = spawn(ollamaPath, ['serve'], {
     detached: false,
@@ -63,12 +90,14 @@ function startOllama() {
 function startBackend() {
   console.log('[Electron] Starting Python backend...')
   const backendPath = getResourcePath('backend')
-  const scriptPath = path.join(backendPath, 'start_backend.sh')
+  const scriptName = isWin ? 'start_backend.bat' : 'start_backend.sh'
+  const scriptPath = path.join(backendPath, scriptName)
+  const shell = isWin ? 'cmd.exe' : '/bin/bash'
+  const args = isWin ? ['/c', scriptPath] : [scriptPath]
 
-  // Kill any existing process on port 8000
-  try { execSync('lsof -ti:8000 | xargs kill -9') } catch (e) {}
+  killPort8000()
 
-  backendProcess = spawn('/bin/bash', [scriptPath], {
+  backendProcess = spawn(shell, args, {
     cwd: backendPath,
     detached: false,
     stdio: 'pipe'
@@ -117,7 +146,7 @@ function createSetupWindow() {
     width: 500,
     height: 600,
     resizable: false,
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: isWin ? 'default' : 'hiddenInset',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -134,7 +163,7 @@ function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: isWin ? 'default' : 'hiddenInset',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
