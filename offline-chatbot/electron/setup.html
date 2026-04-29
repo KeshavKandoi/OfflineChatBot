@@ -42,12 +42,12 @@
 
   <div class="model-list">
     <div class="model-item" id="model-qwen">
-      <div class="model-name">🤖 qwen:7b — Chat Model (4.5 GB)</div>
+      <div class="model-name">🤖 qwen2.5:7b — Chat + Code Model (4.7 GB)</div>
       <div class="progress-bar"><div class="progress-fill" id="fill-qwen"></div></div>
       <div class="status" id="status-qwen">Waiting...</div>
     </div>
     <div class="model-item" id="model-llava">
-      <div class="model-name">👁 llava:7b — Vision Model (4.7 GB)</div>
+      <div class="model-name">👁 minicpm-v — Vision Model (5.5 GB)</div>
       <div class="progress-bar"><div class="progress-fill" id="fill-llava"></div></div>
       <div class="status" id="status-llava">Waiting...</div>
     </div>
@@ -64,8 +64,8 @@
     const { ipcRenderer } = require('electron')
     
     const modelMap = {
-      'qwen:7b': 'qwen',
-      'llava:7b': 'llava',
+      'qwen2.5:7b': 'qwen',
+      'minicpm-v': 'llava',
       'nomic-embed-text': 'nomic'
     }
 
