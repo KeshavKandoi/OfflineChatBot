@@ -699,8 +699,8 @@ export default function App() {
           <h2 className="section-title">Ready to own<br />your AI experience?</h2>
           <p className="section-sub">Free download. No account required. Works offline from day one.</p>
           <div style={{display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap'}}>
-            <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v1.0.0/Offline%20AI-1.0.0-arm64.dmg" className="btn-primary">↓ Download for Mac — Free</a>
-            <a href="https://github.com/KeshavKandoi/OfflineChatBot" className="btn-secondary">View Source on GitHub</a>
+            <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline.AI-1.0.0-arm64.dmg" className="btn-primary">↓ Download for Mac — Free</a>
+            <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline.AI.Setup.1.0.0.exe" className="btn-secondary">↓ Download for Windows — Free</a>
           </div>
           <p style={{fontSize: '12px', color: 'var(--faint)', marginTop: '20px'}}>macOS 13+ · Apple Silicon · 358MB</p>
         </div>
