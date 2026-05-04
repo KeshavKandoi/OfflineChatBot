@@ -400,7 +400,7 @@ export default function App() {
 
       {/* NAVBAR */}
       <nav>
-        <div className="logo">Offline AI</div>
+        <div className="logo">Nexachat</div>
         <ul className="nav-links">
           <li><a href="#features">Features</a></li>
           <li><a href="#how-it-works">How It Works</a></li>
@@ -450,7 +450,7 @@ export default function App() {
               <div className="dot dot-y"></div>
               <div className="dot dot-g"></div>
             </div>
-            <div className="chat-title">Offline AI — New Chat</div>
+            <div className="chat-title">Nexachat — New Chat</div>
             <div className="chat-status"><div className="status-dot"></div>Gemini 2.5 Active</div>
           </div>
           <div className="chat-messages">
@@ -712,7 +712,7 @@ export default function App() {
       <footer>
         <div className="footer-grid">
           <div className="footer-brand">
-            <span className="logo">Offline AI</span>
+            <span className="logo">Nexachat</span>
             <p className="footer-tagline">A fully offline AI assistant built for privacy-conscious power users. Your intelligence, your rules.</p>
             <div className="footer-socials">
               <a href="https://github.com/KeshavKandoi/OfflineChatBot" className="social-icon">⌥</a>
@@ -749,7 +749,7 @@ export default function App() {
           </div>
         </div>
         <div className="footer-bottom">
-          <div className="footer-copy">© 2026 Offline AI · Built by Keshav Kandoi</div>
+          <div className="footer-copy">© 2026 Nexachat · Built by Keshav Kandoi</div>
           <div className="footer-legal">
             <a href="#">Privacy Policy</a>
             <a href="#">Terms of Use</a>

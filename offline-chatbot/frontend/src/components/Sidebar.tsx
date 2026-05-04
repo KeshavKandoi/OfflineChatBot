@@ -77,7 +77,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
         {/* Header */}
         <div style={{ padding: '20px 16px 12px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>
-            Offline AI
+            Nexachat
           </div>
           <button onClick={onNew} style={{
             width: '100%', padding: '10px 14px',

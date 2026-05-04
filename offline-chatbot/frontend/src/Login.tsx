@@ -82,7 +82,7 @@ export default function Login({ onLogin }: Props) {
             fontSize: '22px', fontWeight: 700,
             color: 'var(--text-primary)', margin: 0
           }}>
-            Offline AI
+            Nexachat
           </h1>
           <p style={{
             fontSize: '13px', color: 'var(--text-muted)',
