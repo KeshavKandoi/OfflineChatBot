@@ -305,3 +305,21 @@ def get_user_sessions(user_id: int, db: DBSession = Depends(get_db)):
     return db.query(Session).filter(
         Session.user_id == user_id
     ).order_by(Session.created_at.desc()).all()
+
+@app.post("/generate-title")
+async def generate_title(req: dict):
+    message = req.get("message", "")
+    try:
+        from gemini_client import is_online, client
+        from google.genai import types
+        if is_online():
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=f"Generate a short 4-5 word title for a chat that starts with this message. Reply with ONLY the title, no quotes, no punctuation at end:\n{message}"
+            )
+            return {"title": response.text.strip()}
+    except:
+        pass
+    # Fallback: use first 40 chars of message
+    title = message.strip()[:40] + ("..." if len(message) > 40 else "")
+    return {"title": title}
