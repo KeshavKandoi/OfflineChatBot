@@ -1,0 +1,83 @@
+name: Build Mac + Windows
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Download Ollama Mac binary
+        run: |
+          mkdir -p electron/binaries/mac
+          curl -L https://github.com/ollama/ollama/releases/latest/download/ollama-darwin -o electron/binaries/mac/ollama
+          chmod +x electron/binaries/mac/ollama
+      - name: Install frontend deps and build
+        run: |
+          cd frontend
+          npm install
+          npm run build
+      - name: Install electron deps and build Mac
+        run: |
+          cd electron
+          npm install
+          npm run build:mac
+      - name: Upload Mac artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: mac-build
+          path: electron/dist/*.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Download Ollama Windows binary
+        run: |
+          mkdir -p electron/binaries/win
+          Invoke-WebRequest -Uri "https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.exe" -OutFile "electron/binaries/win/ollama.exe"
+        shell: pwsh
+      - name: Install frontend deps and build
+        run: |
+          cd frontend
+          npm install
+          npm run build
+      - name: Install electron deps and build Windows
+        run: |
+          cd electron
+          npm install
+          npm run build:win
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: electron/dist/*.exe
+
+  release:
+    needs: [build-mac, build-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            mac-build/*.dmg
+            windows-build/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
