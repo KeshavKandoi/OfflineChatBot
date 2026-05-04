@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import type { ChatSession, Message } from './types'
-import { createSession, getSessions, getMessages, deleteSession, updateSessionTitle } from './api'
+import { createSession, getSessions, getMessages, deleteSession, updateSessionTitle, generateTitle } from './api'
 import Sidebar from './components/Sidebar'
 import ChatWindow from './components/ChatWindow'
 import Login from './Login'
@@ -79,7 +79,7 @@ export default function App() {
   }
 
   async function handleAutoTitle(sessionId: string, firstMessage: string) {
-    const title = firstMessage.trim().slice(0, 40) + (firstMessage.length > 40 ? '...' : '')
+    const title = await generateTitle(firstMessage)
     await updateSessionTitle(sessionId, title)
     await loadSessions()
   }
