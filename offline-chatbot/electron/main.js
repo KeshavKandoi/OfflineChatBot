@@ -9,13 +9,13 @@ let setupWindow
 let backendProcess
 let ollamaProcess
 
+const isWin = process.platform === 'win32'
 
 // ── Get correct paths ─────────────────────────────────────────
 function getResourcePath(relativePath) {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, relativePath)
   }
-  // In dev mode, backend is one level up
   if (relativePath === 'backend') {
     return path.join(__dirname, '..', 'backend')
   }
@@ -24,14 +24,14 @@ function getResourcePath(relativePath) {
 
 // ── Get bundled Ollama binary path ────────────────────────────
 function getOllamaPath() {
-  const binaryName = 'ollama'
-  const platform = 'mac'
+  const binaryName = isWin ? 'ollama.exe' : 'ollama'
+  const platform = isWin ? 'win' : 'mac'
   return getResourcePath(`binaries/${platform}/${binaryName}`)
 }
 
 // ── Check if models are already downloaded ────────────────────
 function modelsExist() {
-  const homeDir = process.env.HOME
+  const homeDir = isWin ? process.env.USERPROFILE : process.env.HOME
   const ollamaModelsPath = path.join(
     homeDir, '.ollama', 'models', 'manifests', 'registry.ollama.ai'
   )
@@ -48,14 +48,22 @@ function modelsExist() {
 // ── Kill process on port 8000 ─────────────────────────────────
 function killPort8000() {
   try {
-    execSync('lsof -ti:8000 | xargs kill -9')
+    if (isWin) {
+      execSync('for /f "tokens=5" %a in (\'netstat -aon ^| findstr :8000\') do taskkill /F /PID %a', { shell: true })
+    } else {
+      execSync('lsof -ti:8000 | xargs kill -9')
+    }
   } catch (e) {}
 }
 
 // ── Kill existing Ollama ──────────────────────────────────────
 function killOllama() {
   try {
-    execSync('pkill ollama')
+    if (isWin) {
+      execSync('taskkill /IM ollama.exe /F', { shell: true })
+    } else {
+      execSync('pkill ollama')
+    }
   } catch (e) {}
 }
 
@@ -69,7 +77,8 @@ function startOllama() {
   ollamaProcess = spawn(ollamaPath, ['serve'], {
     detached: false,
     stdio: 'ignore',
-    env: { ...process.env }
+    env: { ...process.env },
+    shell: isWin
   })
 
   ollamaProcess.on('error', (err) => {
@@ -81,10 +90,10 @@ function startOllama() {
 function startBackend() {
   console.log('[Electron] Starting Python backend...')
   const backendPath = getResourcePath('backend')
-  const scriptName = 'start_backend.sh'
+  const scriptName = isWin ? 'start_backend.bat' : 'start_backend.sh'
   const scriptPath = path.join(backendPath, scriptName)
-  const shell = '/bin/bash'
-  const args = [scriptPath]
+  const shell = isWin ? 'cmd.exe' : '/bin/bash'
+  const args = isWin ? ['/c', scriptPath] : [scriptPath]
 
   killPort8000()
 
@@ -137,13 +146,12 @@ function createSetupWindow() {
     width: 500,
     height: 600,
     resizable: false,
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: isWin ? 'default' : 'hiddenInset',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     }
   })
-
   setupWindow.loadFile(path.join(__dirname, 'setup.html'))
 }
 
@@ -154,7 +162,7 @@ function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: isWin ? 'default' : 'hiddenInset',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -175,9 +183,7 @@ function createWindow() {
     return { action: 'deny' }
   })
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+  mainWindow.on('closed', () => { mainWindow = null })
 }
 
 // ── Download models via bundled ollama ────────────────────────
@@ -189,7 +195,8 @@ async function downloadModels(win) {
     console.log(`[Electron] Downloading ${model}...`)
     await new Promise((resolve, reject) => {
       const pull = spawn(ollamaPath, ['pull', model], {
-        env: { ...process.env }
+        env: { ...process.env },
+        shell: isWin
       })
 
       pull.stdout.on('data', (data) => {
