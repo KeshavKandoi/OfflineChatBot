@@ -8,9 +8,10 @@ interface Props {
   sessionId: string | null
   initialMessages: Message[]
   onAutoTitle?: (sessionId: string, firstMessage: string) => void
+  userMemory?: string
 }
 
-export default function ChatWindow({ sessionId, initialMessages, onAutoTitle }: Props) {
+export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, userMemory = '' }: Props) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
@@ -84,7 +85,8 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle }: 
           setStreaming(false)
         },
         false,
-        ''
+        '',
+        userMemory
       )
     }
   }
@@ -157,7 +159,8 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle }: 
         setStreaming(false)
       },
       fileUploaded,
-      uploadedFilename   // pass filename to API
+      uploadedFilename,   // pass filename to API
+      userMemory
     )
   }
 

@@ -48,12 +48,13 @@ export async function streamChat(
   onChunk: (chunk: string) => void,
   onDone: () => void,
   has_file: boolean = false,
-  filename: string = ""
+  filename: string = "",
+  user_memory: string = ""
 ) {
   const res = await fetch(`${BASE}/chat/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, session_id, has_file, filename })
+    body: JSON.stringify({ message, session_id, has_file, filename, user_memory })
   })
 
   const reader = res.body!.getReader()

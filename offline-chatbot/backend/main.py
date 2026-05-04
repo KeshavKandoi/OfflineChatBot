@@ -38,6 +38,7 @@ class ChatRequest(BaseModel):
     session_id: str = "default"
     has_file: bool = False
     filename: str = ""
+    user_memory: str = ""
 
 class SessionCreate(BaseModel):
     id: str
@@ -172,11 +173,17 @@ async def chat_stream(req: ChatRequest, db: DBSession = Depends(get_db)):
     else:
         rag_context = []
 
+    # Load user long term memory
+    user_memory = req.user_memory if hasattr(req, 'user_memory') and req.user_memory else ""
+
     system_content = (
         "You are a helpful assistant with memory. "
         "Always prioritize information the user has directly told you. "
         "Use past conversation context to answer personal questions like name, preferences, etc."
     )
+
+    if user_memory:
+        system_content += f"\n\nIMPORTANT - Here is what the user has told you to always remember about them:\n{user_memory}\n\nAlways use this information when relevant."
 
     if rag_context:
         rag_text = "\n".join(rag_context)

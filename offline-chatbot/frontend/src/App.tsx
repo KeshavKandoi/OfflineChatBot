@@ -10,6 +10,8 @@ interface User {
   id: number
   name: string
   username: string
+  memory?: string
+  photo?: string
 }
 
 export default function App() {
@@ -124,6 +126,7 @@ export default function App() {
         onUpdateUser={(u) => { localStorage.setItem("user", JSON.stringify(u)); setUser(u) }}
       />}
       <ChatWindow
+        userMemory={user?.memory || ""}
         sessionId={activeId}
         initialMessages={messages}
         onAutoTitle={handleAutoTitle}
