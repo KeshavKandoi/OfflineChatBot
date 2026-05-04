@@ -16,12 +16,15 @@ interface Props {
   onRename: (id: string, title: string) => void
   user: User
   onLogout: () => void
+  onUpdateName: (name: string) => void
 }
 
-export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename, user, onLogout }: Props) {
+export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename, user, onLogout, onUpdateName }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const [search, setSearch] = useState('')
+  const [editingName, setEditingName] = useState(false)
+  const [nameValue, setNameValue] = useState(user.name)
 
   function startEdit(s: ChatSession) {
     setEditing(s.id)
@@ -33,6 +36,13 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
       onRename(id, editValue.trim())
     }
     setEditing(null)
+  }
+
+  function saveName() {
+    if (nameValue.trim()) {
+      onUpdateName(nameValue.trim())
+    }
+    setEditingName(false)
   }
 
   return (
@@ -172,9 +182,34 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
 
         {/* Name + username */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {user.name}
-          </div>
+          {editingName ? (
+            <input
+              value={nameValue}
+              onChange={e => setNameValue(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false) }}
+              onBlur={saveName}
+              autoFocus
+              style={{
+                width: '100%',
+                background: 'var(--bg-primary)',
+                border: '1px solid var(--accent)',
+                borderRadius: '4px',
+                padding: '3px 6px',
+                fontSize: '13px',
+                color: 'var(--text-primary)',
+                outline: 'none',
+                fontFamily: 'DM Sans, sans-serif'
+              }}
+            />
+          ) : (
+            <div
+              onClick={() => { setEditingName(true); setNameValue(user.name) }}
+              title="Click to edit name"
+              style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer' }}
+            >
+              {user.name} ✎
+            </div>
+          )}
           <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
             @{user.username}
           </div>
