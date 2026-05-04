@@ -13,9 +13,9 @@
   --text-primary: #f0f0f0;
   --text-secondary: #888888;
   --text-muted: #555555;
-  --accent: #7c6af7;
-  --accent-hover: #9b8fff;
-  --accent-dim: #7c6af720;
+  --accent: #00c853;
+  --accent-hover: #69f0ae;
+  --accent-dim: #00c85320;
   --success: #4ade80;
   --danger: #f87171;
 }

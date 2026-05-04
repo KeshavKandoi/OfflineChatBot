@@ -429,6 +429,7 @@ export default function App() {
           <div className="hero-actions">
             <a href="#download" className="btn-primary">↓ Download for Mac</a>
             <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline.AI.Setup.1.0.0.exe" className="btn-secondary">↓ Download for Windows</a>
+            <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline.AI.Setup.1.0.0.exe" className="btn-secondary">↓ Download for Windows</a>
             <a href="#features" className="btn-secondary">See how it works →</a>
           </div>
           <div className="hero-stats">
