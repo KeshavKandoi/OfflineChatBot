@@ -9,7 +9,6 @@ let setupWindow
 let backendProcess
 let ollamaProcess
 
-const isWin = process.platform === 'win32'
 
 // ── Get correct paths ─────────────────────────────────────────
 function getResourcePath(relativePath) {
@@ -25,14 +24,14 @@ function getResourcePath(relativePath) {
 
 // ── Get bundled Ollama binary path ────────────────────────────
 function getOllamaPath() {
-  const binaryName = isWin ? 'ollama.exe' : 'ollama'
-  const platform = isWin ? 'win' : 'mac'
+  const binaryName = 'ollama'
+  const platform = 'mac'
   return getResourcePath(`binaries/${platform}/${binaryName}`)
 }
 
 // ── Check if models are already downloaded ────────────────────
 function modelsExist() {
-  const homeDir = isWin ? process.env.USERPROFILE : process.env.HOME
+  const homeDir = process.env.HOME
   const ollamaModelsPath = path.join(
     homeDir, '.ollama', 'models', 'manifests', 'registry.ollama.ai'
   )
@@ -49,22 +48,14 @@ function modelsExist() {
 // ── Kill process on port 8000 ─────────────────────────────────
 function killPort8000() {
   try {
-    if (isWin) {
-      execSync('for /f "tokens=5" %a in (\'netstat -aon ^| findstr :8000\') do taskkill /F /PID %a', { shell: true })
-    } else {
-      execSync('lsof -ti:8000 | xargs kill -9')
-    }
+    execSync('lsof -ti:8000 | xargs kill -9')
   } catch (e) {}
 }
 
 // ── Kill existing Ollama ──────────────────────────────────────
 function killOllama() {
   try {
-    if (isWin) {
-      execSync('taskkill /IM ollama.exe /F')
-    } else {
-      execSync('pkill ollama')
-    }
+    execSync('pkill ollama')
   } catch (e) {}
 }
 
@@ -90,10 +81,10 @@ function startOllama() {
 function startBackend() {
   console.log('[Electron] Starting Python backend...')
   const backendPath = getResourcePath('backend')
-  const scriptName = isWin ? 'start_backend.bat' : 'start_backend.sh'
+  const scriptName = 'start_backend.sh'
   const scriptPath = path.join(backendPath, scriptName)
-  const shell = isWin ? 'cmd.exe' : '/bin/bash'
-  const args = isWin ? ['/c', scriptPath] : [scriptPath]
+  const shell = '/bin/bash'
+  const args = [scriptPath]
 
   killPort8000()
 
@@ -146,7 +137,7 @@ function createSetupWindow() {
     width: 500,
     height: 600,
     resizable: false,
-    titleBarStyle: isWin ? 'default' : 'hiddenInset',
+    titleBarStyle: 'hiddenInset',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -163,7 +154,7 @@ function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    titleBarStyle: isWin ? 'default' : 'hiddenInset',
+    titleBarStyle: 'hiddenInset',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
