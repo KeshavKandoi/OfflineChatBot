@@ -121,6 +121,7 @@ export default function App() {
         user={user}
         onLogout={handleLogout}
         onUpdateName={handleUpdateName}
+        onUpdateUser={(u) => { localStorage.setItem("user", JSON.stringify(u)); setUser(u) }}
       />}
       <ChatWindow
         sessionId={activeId}
