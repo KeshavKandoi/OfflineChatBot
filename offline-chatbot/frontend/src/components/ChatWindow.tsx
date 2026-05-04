@@ -21,6 +21,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle }: 
   const bottomRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const userScrolled = useRef(false)
+  const abortRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     setMessages(initialMessages)
@@ -43,6 +44,15 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle }: 
     setAttachedFile(null)
     setAttachedPreview(null)
     setUploadStatus('')
+  }
+
+  function stopStreaming() {
+    if (abortRef.current) {
+      abortRef.current()
+      abortRef.current = null
+    }
+    setStreaming(false)
+    setStreamingText('')
   }
 
   function handleEdit(id: number, newContent: string) {
@@ -327,22 +337,36 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle }: 
             onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
 
-          <button
-            onClick={send}
-            disabled={streaming || (!input.trim() && !attachedFile)}
-            style={{
-              padding: '12px 20px', borderRadius: '12px', border: 'none',
-              background: (streaming || (!input.trim() && !attachedFile))
-                ? 'var(--bg-tertiary)' : 'var(--accent)',
-              color: (streaming || (!input.trim() && !attachedFile))
-                ? 'var(--text-muted)' : '#fff',
-              fontSize: '14px', fontWeight: 500,
-              cursor: streaming ? 'not-allowed' : 'pointer',
-              transition: 'all 0.15s', whiteSpace: 'nowrap'
-            }}
-          >
-            {streaming ? '...' : 'Send →'}
-          </button>
+          {streaming ? (
+            <button
+              onClick={stopStreaming}
+              style={{
+                padding: '12px 20px', borderRadius: '12px', border: 'none',
+                background: 'var(--danger, #ef4444)', color: '#fff',
+                fontSize: '14px', fontWeight: 500, cursor: 'pointer',
+                transition: 'all 0.15s', whiteSpace: 'nowrap'
+              }}
+            >
+              ⏹ Stop
+            </button>
+          ) : (
+            <button
+              onClick={send}
+              disabled={!input.trim() && !attachedFile}
+              style={{
+                padding: '12px 20px', borderRadius: '12px', border: 'none',
+                background: (!input.trim() && !attachedFile)
+                  ? 'var(--bg-tertiary)' : 'var(--accent)',
+                color: (!input.trim() && !attachedFile)
+                  ? 'var(--text-muted)' : '#fff',
+                fontSize: '14px', fontWeight: 500,
+                cursor: (!input.trim() && !attachedFile) ? 'not-allowed' : 'pointer',
+                transition: 'all 0.15s', whiteSpace: 'nowrap'
+              }}
+            >
+              Send →
+            </button>
+          )}
         </div>
       </div>
 

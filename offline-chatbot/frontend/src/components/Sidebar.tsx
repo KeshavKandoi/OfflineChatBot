@@ -21,6 +21,7 @@ interface Props {
 export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename, user, onLogout }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [search, setSearch] = useState('')
 
   function startEdit(s: ChatSession) {
     setEditing(s.id)
@@ -62,6 +63,19 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
         >
           <span style={{ fontSize: '16px' }}>+</span> New Chat
         </button>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search chats..."
+          style={{
+            width: '100%', marginTop: '10px', padding: '8px 12px',
+            borderRadius: '8px', background: 'var(--bg-tertiary)',
+            border: '1px solid var(--border)', color: 'var(--text-primary)',
+            fontSize: '13px', outline: 'none', fontFamily: 'DM Sans, sans-serif'
+          }}
+          onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+          onBlur={e => e.target.style.borderColor = 'var(--border)'}
+        />
       </div>
 
       {/* Sessions list */}
@@ -71,7 +85,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
             No chats yet
           </div>
         )}
-        {sessions.map(s => (
+        {sessions.filter(s => s.title.toLowerCase().includes(search.toLowerCase())).map(s => (
           <div
             key={s.id}
             style={{
