@@ -163,7 +163,7 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     titleBarStyle: isWin ? 'default' : 'hiddenInset',
-    webPreferences: {
+webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
     }

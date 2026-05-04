@@ -28,7 +28,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
 
   function toggleVoice() {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SpeechRecognition) { alert('Voice input not supported in this browser'); return }
+    if (!SpeechRecognition) { alert('Voice input not supported. Make sure microphone permission is granted.'); return }
     if (isListening) {
       recognitionRef.current?.stop()
       setIsListening(false)
@@ -375,7 +375,13 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
               fontSize: '18px', cursor: 'pointer', transition: 'all 0.15s',
               animation: isListening ? 'pulse 1s infinite' : 'none'
             }}
-          >🎤</button>
+          ><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="2" y="9" width="2" height="6" rx="1"/>
+              <rect x="6" y="6" width="2" height="12" rx="1"/>
+              <rect x="10" y="3" width="2" height="18" rx="1"/>
+              <rect x="14" y="6" width="2" height="12" rx="1"/>
+              <rect x="18" y="9" width="2" height="6" rx="1"/>
+            </svg></button>
           {streaming ? (
             <button
               onClick={stopStreaming}
