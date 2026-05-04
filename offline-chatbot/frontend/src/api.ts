@@ -65,3 +65,17 @@ export async function streamChat(
     onChunk(decoder.decode(value))
   }
 }
+
+export async function generateTitle(message: string): Promise<string> {
+  try {
+    const res = await fetch(`${BASE}/generate-title`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    })
+    const data = await res.json()
+    return data.title || message.slice(0, 40)
+  } catch {
+    return message.slice(0, 40)
+  }
+}
