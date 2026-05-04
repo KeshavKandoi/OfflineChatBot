@@ -428,6 +428,7 @@ export default function App() {
           <p>A fully offline AI assistant that runs on your Mac. No data leaves your device — ever. Switch to Gemini 2.5 when online for smarter answers.</p>
           <div className="hero-actions">
             <a href="#download" className="btn-primary">↓ Download for Mac</a>
+            <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline.AI.Setup.1.0.0.exe" className="btn-secondary">↓ Download for Windows</a>
             <a href="#features" className="btn-secondary">See how it works →</a>
           </div>
           <div className="hero-stats">
