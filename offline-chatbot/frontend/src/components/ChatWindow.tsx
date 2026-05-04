@@ -23,6 +23,31 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const userScrolled = useRef(false)
   const abortRef = useRef<(() => void) | null>(null)
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
+
+  function toggleVoice() {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) { alert('Voice input not supported in this browser'); return }
+    if (isListening) {
+      recognitionRef.current?.stop()
+      setIsListening(false)
+      return
+    }
+    const recognition = new SpeechRecognition()
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.lang = 'en-US'
+    recognition.onresult = (e: any) => {
+      const transcript = e.results[0][0].transcript
+      setInput(prev => prev ? prev + ' ' + transcript : transcript)
+    }
+    recognition.onend = () => setIsListening(false)
+    recognition.onerror = () => setIsListening(false)
+    recognitionRef.current = recognition
+    recognition.start()
+    setIsListening(true)
+  }
 
   useEffect(() => {
     setMessages(initialMessages)
@@ -340,6 +365,17 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
             onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
 
+          <button
+            onClick={toggleVoice}
+            title={isListening ? 'Stop listening' : 'Voice input'}
+            style={{
+              padding: '12px', borderRadius: '12px', border: 'none',
+              background: isListening ? 'var(--accent)' : 'var(--bg-tertiary)',
+              color: isListening ? '#fff' : 'var(--text-muted)',
+              fontSize: '18px', cursor: 'pointer', transition: 'all 0.15s',
+              animation: isListening ? 'pulse 1s infinite' : 'none'
+            }}
+          >🎤</button>
           {streaming ? (
             <button
               onClick={stopStreaming}
