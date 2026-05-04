@@ -55,7 +55,7 @@ jobs:
       - name: Download Ollama Windows binary
         run: |
           mkdir -p offline-chatbot/electron/binaries/win
-          Invoke-WebRequest -Uri "https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.exe" -OutFile "offline-chatbot/electron/binaries/win/ollama.exe"
+          Invoke-WebRequest -Uri "https://github.com/ollama/ollama/releases/latest/download/OllamaSetup.exe" -OutFile "offline-chatbot/electron/binaries/win/ollama.exe"
         shell: pwsh
 
       - name: Install frontend deps and build
