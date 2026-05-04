@@ -23,31 +23,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const userScrolled = useRef(false)
   const abortRef = useRef<(() => void) | null>(null)
-  const [isListening, setIsListening] = useState(false)
-  const recognitionRef = useRef<any>(null)
 
-  function toggleVoice() {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SpeechRecognition) { alert('Voice input not supported. Make sure microphone permission is granted.'); return }
-    if (isListening) {
-      recognitionRef.current?.stop()
-      setIsListening(false)
-      return
-    }
-    const recognition = new SpeechRecognition()
-    recognition.continuous = false
-    recognition.interimResults = false
-    recognition.lang = 'en-US'
-    recognition.onresult = (e: any) => {
-      const transcript = e.results[0][0].transcript
-      setInput(prev => prev ? prev + ' ' + transcript : transcript)
-    }
-    recognition.onend = () => setIsListening(false)
-    recognition.onerror = () => setIsListening(false)
-    recognitionRef.current = recognition
-    recognition.start()
-    setIsListening(true)
-  }
 
   useEffect(() => {
     setMessages(initialMessages)
@@ -365,23 +341,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
             onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
 
-          <button
-            onClick={toggleVoice}
-            title={isListening ? 'Stop listening' : 'Voice input'}
-            style={{
-              padding: '12px', borderRadius: '12px', border: 'none',
-              background: isListening ? 'var(--accent)' : 'var(--bg-tertiary)',
-              color: isListening ? '#fff' : 'var(--text-muted)',
-              fontSize: '18px', cursor: 'pointer', transition: 'all 0.15s',
-              animation: isListening ? 'pulse 1s infinite' : 'none'
-            }}
-          ><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <rect x="2" y="9" width="2" height="6" rx="1"/>
-              <rect x="6" y="6" width="2" height="12" rx="1"/>
-              <rect x="10" y="3" width="2" height="18" rx="1"/>
-              <rect x="14" y="6" width="2" height="12" rx="1"/>
-              <rect x="18" y="9" width="2" height="6" rx="1"/>
-            </svg></button>
+
           {streaming ? (
             <button
               onClick={stopStreaming}
