@@ -1,68 +1,33 @@
 {
-  "name": "nexachat",
+  "name": "offline-ai",
   "version": "1.0.0",
-  "description": "Nexachat Chatbot",
+  "description": "Offline AI Chatbot",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder",
     "build:mac": "electron-builder --mac",
     "build:win": "electron-builder --win"
   },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
   "build": {
-    "appId": "com.offlineai.app",
-    "productName": "Nexachat",
-    "mac": {
-      "target": "dmg",
-      "category": "public.app-category.productivity",
-      "identity": null,
-      "icon": "icon.icns"
-    },
+    "appId": "com.keshav.offlineai",
+    "productName": "Offline AI",
     "files": [
       "main.js",
-      "setup.html"
+      "setup.html",
+      "preload.js"
     ],
     "extraResources": [
-      {
-        "from": "../backend",
-        "to": "backend",
-        "filter": [
-          "**/*",
-          "!**/__pycache__/**",
-          "!**/dist/**",
-          "!**/build/**",
-          "!**/*.pyc"
-        ]
-      },
-      {
-        "from": "../frontend/dist",
-        "to": "frontend/dist"
-      },
-      {
-        "from": "binaries",
-        "to": "binaries"
-      }
+      { "from": "../backend", "to": "backend" },
+      { "from": "../frontend/dist", "to": "frontend/dist" },
+      { "from": "binaries", "to": "binaries" }
     ],
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "assets/icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Nexachat"
-    }
-  },
-  "devDependencies": {
-    "electron": "^36.2.1",
-    "electron-builder": "^26.0.12"
+    "mac": { "target": "dmg" },
+    "win": { "target": "nsis" }
   }
 }

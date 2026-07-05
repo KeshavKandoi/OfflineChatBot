@@ -17,3 +17,7 @@ Screenshot*/
 *.jpg
 *.jpeg
 .DS_Store
+**/.DS_Store
+offline-chatbot/electron/binaries/mac/python-runtime/
+offline-chatbot/electron/binaries/win/python-runtime/
+offline-chatbot/backend/venv/

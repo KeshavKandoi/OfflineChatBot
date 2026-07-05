@@ -16,6 +16,7 @@ function getResourcePath(relativePath) {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, relativePath)
   }
+  // In dev mode, backend is one level up
   if (relativePath === 'backend') {
     return path.join(__dirname, '..', 'backend')
   }
@@ -60,7 +61,7 @@ function killPort8000() {
 function killOllama() {
   try {
     if (isWin) {
-      execSync('taskkill /IM ollama.exe /F', { shell: true })
+      execSync('taskkill /IM ollama.exe /F')
     } else {
       execSync('pkill ollama')
     }
@@ -77,8 +78,7 @@ function startOllama() {
   ollamaProcess = spawn(ollamaPath, ['serve'], {
     detached: false,
     stdio: 'ignore',
-    env: { ...process.env },
-    shell: isWin
+    env: { ...process.env }
   })
 
   ollamaProcess.on('error', (err) => {
@@ -100,7 +100,11 @@ function startBackend() {
   backendProcess = spawn(shell, args, {
     cwd: backendPath,
     detached: false,
-    stdio: 'pipe'
+    stdio: 'pipe',
+    env: {
+      ...process.env,
+      PYTHON_RUNTIME_DIR: getResourcePath('binaries/mac/python-runtime')
+    }
   })
 
   backendProcess.stdout.on('data', (data) => {
@@ -152,6 +156,7 @@ function createSetupWindow() {
       contextIsolation: false
     }
   })
+
   setupWindow.loadFile(path.join(__dirname, 'setup.html'))
 }
 
@@ -163,7 +168,7 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     titleBarStyle: isWin ? 'default' : 'hiddenInset',
-webPreferences: {
+    webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
     }
@@ -183,7 +188,9 @@ webPreferences: {
     return { action: 'deny' }
   })
 
-  mainWindow.on('closed', () => { mainWindow = null })
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
 }
 
 // ── Download models via bundled ollama ────────────────────────
@@ -195,8 +202,7 @@ async function downloadModels(win) {
     console.log(`[Electron] Downloading ${model}...`)
     await new Promise((resolve, reject) => {
       const pull = spawn(ollamaPath, ['pull', model], {
-        env: { ...process.env },
-        shell: isWin
+        env: { ...process.env }
       })
 
       pull.stdout.on('data', (data) => {
