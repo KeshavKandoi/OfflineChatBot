@@ -22,3 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+offline-chatbot/electron/binaries/mac/
+offline-chatbot/electron/binaries/win/
