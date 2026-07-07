@@ -21,3 +21,5 @@ Screenshot*/
 offline-chatbot/electron/binaries/mac/python-runtime/
 offline-chatbot/electron/binaries/win/python-runtime/
 offline-chatbot/backend/venv/
+offline-chatbot/electron/binaries/mac/
+offline-chatbot/electron/binaries/win/
