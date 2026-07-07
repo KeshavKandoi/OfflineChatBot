@@ -429,7 +429,6 @@ export default function App() {
           <div className="hero-actions">
             <a href="#download" className="btn-primary">↓ Download for Mac</a>
             <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline.AI.Setup.1.0.0.exe" className="btn-secondary">↓ Download for Windows</a>
-            <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline.AI.Setup.1.0.0.exe" className="btn-secondary">↓ Download for Windows</a>
             <a href="#features" className="btn-secondary">See how it works →</a>
           </div>
           <div className="hero-stats">
@@ -701,10 +700,11 @@ export default function App() {
           <h2 className="section-title">Ready to own<br />your AI experience?</h2>
           <p className="section-sub">Free download. No account required. Works offline from day one.</p>
           <div style={{display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap'}}>
-            <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline.AI-1.0.0-arm64.dmg" className="btn-primary">↓ Download for Mac — Free</a>
+            <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline-AI-1.0.1-arm64.dmg" className="btn-primary">↓ Download for Mac — Free</a>
             <a href="https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v2.1.0/Offline.AI.Setup.1.0.0.exe" className="btn-secondary">↓ Download for Windows — Free</a>
           </div>
-          <p style={{fontSize: '12px', color: 'var(--faint)', marginTop: '20px'}}>macOS 13+ · Apple Silicon · 358MB</p>
+          <p style={{fontSize: '12px', color: 'var(--faint)', marginTop: '20px'}}>macOS 13+ · Apple Silicon · 588MB</p>
+            <p style={{fontSize: '12px', color: 'var(--faint)', marginTop: '8px', maxWidth: '440px', marginLeft: 'auto', marginRight: 'auto'}}>macOS may say the app is "damaged" on first launch — this just means it isn't notarized by Apple yet. Right-click the app in Applications → Open → Open again, and it'll run fine.</p>
         </div>
       </section>
 
