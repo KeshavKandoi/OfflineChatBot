@@ -1,6 +1,6 @@
 {
   "name": "offline-ai",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Offline AI Chatbot",
   "main": "main.js",
   "scripts": {
@@ -24,10 +24,19 @@
     ],
     "extraResources": [
       { "from": "../backend", "to": "backend" },
-      { "from": "../frontend/dist", "to": "frontend/dist" },
-      { "from": "binaries", "to": "binaries" }
+      { "from": "../frontend/dist", "to": "frontend/dist" }
     ],
-    "mac": { "target": "dmg" },
-    "win": { "target": "nsis" }
+    "mac": {
+      "target": "dmg",
+      "extraResources": [
+        { "from": "binaries/mac", "to": "binaries/mac" }
+      ]
+    },
+    "win": {
+      "target": "nsis",
+      "extraResources": [
+        { "from": "binaries/win", "to": "binaries/win" }
+      ]
+    }
   }
 }
