@@ -30,6 +30,11 @@ function getOllamaPath() {
   return getResourcePath(`binaries/${platform}/${binaryName}`)
 }
 
+function getPythonRuntimeDir() {
+  const platform = isWin ? 'win' : 'mac'
+  return getResourcePath(`binaries/${platform}/python-runtime`)
+}
+
 // ── Check if models are already downloaded ────────────────────
 function modelsExist() {
   const homeDir = isWin ? process.env.USERPROFILE : process.env.HOME
@@ -103,7 +108,7 @@ function startBackend() {
     stdio: 'pipe',
     env: {
       ...process.env,
-      PYTHON_RUNTIME_DIR: getResourcePath('binaries/mac/python-runtime')
+      PYTHON_RUNTIME_DIR: getPythonRuntimeDir()
     }
   })
 
