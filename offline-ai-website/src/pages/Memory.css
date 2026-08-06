@@ -1,0 +1,99 @@
+.nx-memory {
+  position: relative;
+  z-index: 2;
+  padding: 140px var(--nx-space-10) var(--nx-space-12);
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.nx-memory-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: var(--nx-space-8) 0 var(--nx-space-6);
+  position: relative;
+}
+
+.nx-memory-timeline::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 20px;
+  bottom: 20px;
+  width: 1px;
+  background: var(--nx-border-strong);
+}
+
+.nx-memory-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--nx-space-4);
+  background: transparent;
+  border: none;
+  padding: 12px 8px;
+  text-align: left;
+}
+
+.nx-memory-node-dot {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--nx-bg-elevated);
+  border: 2px solid var(--nx-border-strong);
+  transition: all var(--nx-duration-fast);
+}
+
+.nx-memory-node.is-active .nx-memory-node-dot {
+  border-color: var(--nx-accent);
+  background: var(--nx-accent-soft);
+  box-shadow: 0 0 12px var(--nx-accent-line);
+}
+
+.nx-memory-node-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nx-memory-node-index {
+  font-family: var(--nx-font-mono);
+  font-size: 10.5px;
+  color: var(--nx-text-faint);
+}
+
+.nx-memory-node-label {
+  font-size: var(--nx-text-base);
+  font-weight: 500;
+  color: var(--nx-text-secondary);
+  transition: color var(--nx-duration-fast);
+}
+
+.nx-memory-node.is-active .nx-memory-node-label {
+  color: var(--nx-text-primary);
+}
+
+.nx-memory-node:hover .nx-memory-node-label {
+  color: var(--nx-text-primary);
+}
+
+.nx-memory-detail {
+  background: var(--nx-surface);
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius-md);
+  padding: var(--nx-space-6) var(--nx-space-8);
+  text-align: center;
+}
+
+.nx-memory-detail p {
+  font-size: var(--nx-text-sm);
+  color: var(--nx-text-secondary);
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .nx-memory { padding: 120px var(--nx-space-5) var(--nx-space-8); }
+}
