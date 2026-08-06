@@ -1,0 +1,117 @@
+.nx-terminal {
+  width: 100%;
+  max-width: 560px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(8,8,11,0.72);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+}
+
+.nx-terminal-chrome {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+}
+
+.nx-terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.nx-dot-red { background: #ff5f56; }
+.nx-dot-amber { background: #ffbd2e; }
+.nx-dot-green { background: #27c93f; }
+
+.nx-terminal-title {
+  margin-left: 8px;
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.02em;
+}
+
+.nx-terminal-body {
+  padding: 16px 18px 20px;
+  min-height: 220px;
+  max-height: 280px;
+  overflow-y: auto;
+  font-size: 12.5px;
+  line-height: 1.9;
+}
+
+.nx-terminal-body::-webkit-scrollbar { width: 0; }
+
+.nx-terminal-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  white-space: pre-wrap;
+}
+
+.nx-terminal-prompt {
+  color: var(--nx-signal-green, #34d399);
+  flex-shrink: 0;
+}
+
+.nx-terminal-label {
+  color: rgba(255,255,255,0.55);
+  flex-shrink: 0;
+}
+
+.nx-terminal-ok {
+  color: var(--nx-signal-green, #34d399);
+  font-weight: 500;
+}
+
+.nx-terminal-ok::before {
+  content: "✓ ";
+}
+
+.nx-terminal-spinner {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-top-color: rgba(255,255,255,0.6);
+  display: inline-block;
+  animation: nx-spin 0.7s linear infinite;
+}
+
+@keyframes nx-spin {
+  to { transform: rotate(360deg); }
+}
+
+.nx-terminal-final {
+  margin-top: 6px;
+}
+
+.nx-terminal-final-text {
+  color: #f5f5f7;
+  font-weight: 500;
+}
+
+.nx-terminal-cursor {
+  width: 7px;
+  height: 14px;
+  background: var(--nx-signal-green, #34d399);
+  display: inline-block;
+  animation: nx-blink 1s step-end infinite;
+}
+
+@keyframes nx-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  .nx-terminal { max-width: 100%; }
+  .nx-terminal-body { min-height: 180px; max-height: 220px; font-size: 11.5px; }
+}
