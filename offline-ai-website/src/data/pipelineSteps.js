@@ -1,0 +1,9 @@
+export const PIPELINE_STEPS = [
+  { id: "prompt", label: "Prompt", summary: "You type a message in the desktop app.", detail: "The Electron shell captures input and forwards it to the local FastAPI server over a loopback connection. No request ever touches an external network at this stage." },
+  { id: "router", label: "Request Router", summary: "The backend decides which model should handle it.", detail: "graph.py inspects the message and routes coding-flavored prompts to qwen2.5-coder and general prompts to qwen2.5, using keyword heuristics defined in ollama_client.py." },
+  { id: "inference", label: "Offline Inference", summary: "The chosen model runs locally through Ollama.", detail: "Ollama loads the quantized model weights already resident on disk and streams tokens back over a local socket, no API key, no cloud round trip." },
+  { id: "memory", label: "Local Memory", summary: "Relevant past context is recalled.", detail: "Previous turns are embedded and stored via long_memory.py. Before generating a response, semantically similar prior messages are retrieved from the local vector store to inform the reply." },
+  { id: "retrieval", label: "Document Retrieval", summary: "Uploaded files are searched for relevant chunks.", detail: "If documents have been uploaded, rag.py searches ChromaDB for the passages most semantically related to your question using local sentence-transformer embeddings." },
+  { id: "context", label: "Context Builder", summary: "Everything is assembled into one prompt.", detail: "Retrieved memory, document chunks, and conversation history are merged into a single context window before being handed to the model for generation." },
+  { id: "response", label: "AI Response", summary: "The answer streams back to you, token by token.", detail: "FastAPI streams the model's output over Server-Sent Events to the React frontend, rendered live with Markdown and syntax highlighting as it arrives." },
+];
