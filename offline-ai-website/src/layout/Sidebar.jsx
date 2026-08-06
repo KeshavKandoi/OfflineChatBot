@@ -15,7 +15,6 @@ const NAV_ITEMS = [
   { to: "/faq", label: "FAQ", icon: "help" },
 ];
 
-// Minimal inline icon set (no external icon lib dependency yet)
 function Icon({ name }) {
   const common = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" };
   switch (name) {
@@ -40,7 +39,6 @@ export default function Sidebar() {
 
   const expanded = hovered || pinned;
 
-  // Keyboard navigation: Up/Down to move, Enter to activate, "p" to toggle pin
   useEffect(() => {
     function onKeyDown(e) {
       if (e.key === "ArrowDown") {
@@ -134,7 +132,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="nx-sidebar-footer">
-        
+        <a
           href="https://github.com/KeshavKandoi/OfflineChatBot"
           className="nx-nav-item"
           target="_blank"
