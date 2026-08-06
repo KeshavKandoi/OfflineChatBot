@@ -1,12 +1,15 @@
 import { useState } from "react";
 import ComputeCore from "../components/three/ComputeCore.jsx";
 import TerminalBoot from "../components/TerminalBoot.jsx";
+import PipelineSection from "../components/PipelineSection.jsx";
+import ArchitectureMap from "../components/ArchitectureMap.jsx";
 import "./Overview.css";
 
 export default function Overview() {
   const [, setBooted] = useState(false);
 
   return (
+    <>
     <section className="nx-hero">
       <div className="nx-hero-copy">
         <span className="nx-hero-eyebrow">
@@ -29,7 +32,7 @@ export default function Overview() {
 
         <div className="nx-hero-actions">
           <a href="/downloads" className="nx-btn-primary">Download NexaChat</a>
-          
+            <a
             href="https://github.com/KeshavKandoi/OfflineChatBot"
             className="nx-btn-secondary"
             target="_blank"
@@ -45,5 +48,9 @@ export default function Overview() {
         <TerminalBoot onComplete={() => setBooted(true)} />
       </div>
     </section>
+
+    <PipelineSection />
+    <ArchitectureMap />
+    </>
   );
 }
