@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Sidebar from "./layout/Sidebar.jsx";
+import MobileNav from "./layout/MobileNav.jsx";
 import SilkBackground from "./components/SilkBackground.jsx";
 
 import Overview from "./pages/Overview.jsx";
@@ -17,6 +18,7 @@ export default function App() {
     <>
       <SilkBackground />
       <Sidebar />
+      <MobileNav />
       <main className="nx-shell">
         <Routes>
           <Route path="/" element={<Overview />} />
