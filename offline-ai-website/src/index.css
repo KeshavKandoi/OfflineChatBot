@@ -1,2 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #08080f; }
+html { scroll-behavior: smooth; }
+body { background: #050208; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+h1, h2 { font-family: 'Instrument Serif', serif; }
+
+.container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+.liquid-glass {
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit; padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.18) 20%,
+    rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+    rgba(255,255,255,0.18) 80%, rgba(255,255,255,0.5) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events: none;
+}
+
+.swirl-bg {
+  position: absolute; inset: -25%;
+  background: conic-gradient(from 90deg at 50% 50%, #6d28d9, #c026d3, #f472b6, #a78bfa, #6d28d9);
+  filter: blur(100px) saturate(150%);
+  opacity: 0.45;
+  animation: swirl-spin 26s linear infinite;
+}
+@keyframes swirl-spin {
+  0%   { transform: rotate(0deg) scale(1.2); }
+  50%  { transform: rotate(180deg) scale(1.4); }
+  100% { transform: rotate(360deg) scale(1.2); }
+}
+
+.fade-top { position: absolute; top: 0; left: 0; right: 0; height: 180px; background: linear-gradient(to bottom, #050208, transparent); z-index: 1; pointer-events: none; }
+.fade-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 180px; background: linear-gradient(to top, #050208, transparent); z-index: 1; pointer-events: none; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background: #120f17;
+}
