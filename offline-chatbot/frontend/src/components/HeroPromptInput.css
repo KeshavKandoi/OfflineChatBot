@@ -1,0 +1,93 @@
+.nx-hero-prompt-wrap {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.nx-hero-prompt-gradient {
+  position: absolute;
+  inset: -30px -20px;
+  border-radius: 40px;
+  overflow: hidden;
+  filter: blur(40px) saturate(140%);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.nx-hero-prompt-pill {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 28px;
+  padding: 10px 10px 10px 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+.nx-hero-prompt-textarea {
+  flex: 1;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.5;
+  font-family: inherit;
+  padding: 8px 0;
+  max-height: 160px;
+}
+.nx-hero-prompt-textarea::placeholder { color: rgba(255,255,255,0.4); }
+
+.nx-hero-prompt-icon-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.nx-hero-prompt-icon-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+.nx-hero-prompt-send {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.nx-hero-prompt-send:disabled {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.3);
+  cursor: not-allowed;
+}
+
+.nx-hero-prompt-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: #000;
+  animation: nx-spin 0.7s linear infinite;
+}
+@keyframes nx-spin { to { transform: rotate(360deg); } }
