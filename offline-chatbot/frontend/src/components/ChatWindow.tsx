@@ -178,12 +178,18 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
     </div>
   )
 
-  const isEmptyState = messages.length === 0 && !streamingText
-
   return (
     <div style={{
       flex: 1, display: 'flex', flexDirection: 'column', height: '100vh',
-      background: isEmptyState ? '#000' : 'transparent'
+      background: '#000',
+      ['--bg-primary' as any]: '#000',
+      ['--bg-secondary' as any]: '#000',
+      ['--bg-tertiary' as any]: '#161616',
+      ['--bg-hover' as any]: '#1f1f1f',
+      ['--border' as any]: '#2a2a2a',
+      ['--text-primary' as any]: '#ffffff',
+      ['--text-secondary' as any]: 'rgba(255,255,255,0.65)',
+      ['--text-muted' as any]: 'rgba(255,255,255,0.4)',
     }}>
 
       {/* Messages */}
