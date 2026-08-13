@@ -190,6 +190,9 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
       ['--text-primary' as any]: '#ffffff',
       ['--text-secondary' as any]: 'rgba(255,255,255,0.65)',
       ['--text-muted' as any]: 'rgba(255,255,255,0.4)',
+      ['--accent' as any]: '#3b82f6',
+      ['--accent-hover' as any]: '#2563eb',
+      ['--accent-dim' as any]: '#3b82f620',
     }}>
 
       {/* Messages */}
@@ -336,7 +339,11 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
         )}
 
         {/* Input row */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{
+          display: 'flex', gap: '8px', alignItems: 'center',
+          background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+          borderRadius: '999px', padding: '6px 6px 6px 18px'
+        }}>
           <FileUpload onFileSelect={handleFileSelect} />
 
           <textarea
@@ -352,46 +359,45 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
               : 'Type a message.'}
             rows={1}
             style={{
-              flex: 1, padding: '12px 16px', borderRadius: '12px',
-              background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+              flex: 1, padding: '10px 0', borderRadius: '0',
+              background: 'transparent', border: 'none',
               color: 'var(--text-primary)', fontSize: '14px', outline: 'none',
-              fontFamily: 'DM Sans, sans-serif', transition: 'border-color 0.15s',
+              fontFamily: 'DM Sans, sans-serif',
               resize: 'none', overflow: 'hidden', lineHeight: '1.5',
-              minHeight: '46px', maxHeight: '160px'
+              minHeight: '24px', maxHeight: '160px'
             }}
-            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'}
           />
-
 
           {streaming ? (
             <button
               onClick={stopStreaming}
               style={{
-                padding: '12px 20px', borderRadius: '12px', border: 'none',
-                background: 'var(--danger, #ef4444)', color: '#fff',
+                width: '38px', height: '38px', borderRadius: '50%', border: 'none',
+                background: 'var(--danger, #ef4444)', color: '#fff', flexShrink: 0,
                 fontSize: '14px', fontWeight: 500, cursor: 'pointer',
-                transition: 'all 0.15s', whiteSpace: 'nowrap'
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.15s'
               }}
             >
-              ⏹ Stop
+              ⏹
             </button>
           ) : (
             <button
               onClick={send}
               disabled={!input.trim() && !attachedFile}
               style={{
-                padding: '12px 20px', borderRadius: '12px', border: 'none',
+                width: '38px', height: '38px', borderRadius: '50%', border: 'none',
                 background: (!input.trim() && !attachedFile)
-                  ? 'var(--bg-tertiary)' : 'var(--accent)',
+                  ? 'var(--bg-hover)' : 'var(--accent)',
                 color: (!input.trim() && !attachedFile)
-                  ? 'var(--text-muted)' : '#fff',
-                fontSize: '14px', fontWeight: 500,
+                  ? 'var(--text-muted)' : '#fff', flexShrink: 0,
+                fontSize: '16px', fontWeight: 500,
                 cursor: (!input.trim() && !attachedFile) ? 'not-allowed' : 'pointer',
-                transition: 'all 0.15s', whiteSpace: 'nowrap'
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.15s'
               }}
             >
-              Send →
+              ↑
             </button>
           )}
         </div>
