@@ -3,6 +3,7 @@ import type { Message } from '../types'
 import { streamChat, uploadFile } from '../api'
 import MessageBubble from './MessageBubble'
 import FileUpload from './FileUpload'
+import HeroPromptInput from './HeroPromptInput'
 
 interface Props {
   sessionId: string | null
@@ -190,11 +191,20 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
         }}
         style={{ flex: 1, overflowY: 'auto', padding: '24px 32px' }}>
         {messages.length === 0 && !streamingText && (
-          <div style={{ textAlign: 'center', marginTop: '80px', color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>✦</div>
-            <div style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>
-              How can I help you today?
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', minHeight: '70vh', gap: '32px', padding: '0 24px'
+          }}>
+            <div style={{ fontSize: '28px', fontWeight: 600, color: '#fff' }}>
+              Ask anything
             </div>
+            <HeroPromptInput
+              value={input}
+              onChange={setInput}
+              onSubmit={send}
+              loading={streaming}
+              placeholder="Type a message."
+            />
           </div>
         )}
 
@@ -239,6 +249,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
       </div>
 
       {/* Input area */}
+      {(messages.length > 0 || streamingText) && (
       <div style={{
         padding: '12px 32px 24px',
         borderTop: '1px solid var(--border)',
@@ -374,6 +385,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
           )}
         </div>
       </div>
+      )}
 
       <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
     </div>
