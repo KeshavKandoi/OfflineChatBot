@@ -177,7 +177,7 @@ export default function MessageBubble({ msg, onEdit }: Props) {
               fontSize: '14px', lineHeight: '1.7',
               color: 'var(--text-primary)',
               wordBreak: 'break-word', overflowWrap: 'break-word',
-              minWidth: 0, width: '100%',
+              minWidth: 0, width: isUser ? 'fit-content' : '100%', maxWidth: '100%',
             }}>
               {isUser ? (
                 <span style={{ whiteSpace: 'pre-wrap' }}>{textContent}</span>
