@@ -206,7 +206,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
               onChange={setInput}
               onSubmit={send}
               loading={streaming}
-              placeholder="Type a message."
+              placeholder="Ask Nexa"
             />
           </div>
         )}
@@ -221,20 +221,9 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
 
         {/* Streaming bubble */}
         {streamingText && (
-          <div style={{
-            display: 'flex', justifyContent: 'flex-start',
-            marginBottom: '16px', alignItems: 'flex-end', gap: '10px'
-          }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px' }}>
             <div style={{
-              width: '28px', height: '28px', borderRadius: '50%',
-              background: 'var(--accent-dim)', border: '1px solid var(--accent)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '12px', flexShrink: 0
-            }}>AI</div>
-            <div style={{
-              maxWidth: '72%', padding: '12px 16px',
-              borderRadius: '18px 18px 18px 4px',
-              background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+              maxWidth: '100%', padding: '2px 0',
               fontSize: '14px', lineHeight: '1.7', whiteSpace: 'pre-wrap',
               color: 'var(--text-primary)'
             }}>
@@ -345,7 +334,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())}
             placeholder={attachedFile
               ? 'Ask about this file or press Send...'
-              : 'Type a message.'}
+              : 'Ask Nexa'}
             rows={1}
             style={{
               flex: 1, padding: '10px 0', borderRadius: '0',
