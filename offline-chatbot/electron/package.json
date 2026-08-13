@@ -11,7 +11,7 @@
     "build:win": "electron-builder --win"
   },
   "devDependencies": {
-    "electron": "^31.0.0",
+    "electron": "^31.7.7",
     "electron-builder": "^24.13.3"
   },
   "build": {
@@ -23,19 +23,31 @@
       "preload.js"
     ],
     "extraResources": [
-      { "from": "../backend", "to": "backend" },
-      { "from": "../frontend/dist", "to": "frontend/dist" }
+      {
+        "from": "../backend",
+        "to": "backend"
+      },
+      {
+        "from": "../frontend/dist",
+        "to": "frontend/dist"
+      }
     ],
     "mac": {
       "target": "dmg",
       "extraResources": [
-        { "from": "binaries/mac", "to": "binaries/mac" }
+        {
+          "from": "binaries/mac",
+          "to": "binaries/mac"
+        }
       ]
     },
     "win": {
       "target": "nsis",
       "extraResources": [
-        { "from": "binaries/win", "to": "binaries/win" }
+        {
+          "from": "binaries/win",
+          "to": "binaries/win"
+        }
       ]
     }
   }
