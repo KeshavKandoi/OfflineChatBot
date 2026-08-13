@@ -98,15 +98,6 @@ export default function MessageBubble({ msg, onEdit }: Props) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {!isUser && (
-        <div style={{
-          width: '28px', height: '28px', borderRadius: '50%',
-          background: 'var(--accent-dim)', border: '1px solid var(--accent)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '12px', flexShrink: 0
-        }}>AI</div>
-      )}
-
       <div style={{
         display: 'flex', flexDirection: 'column',
         alignItems: isUser ? 'flex-end' : 'flex-start',
@@ -177,12 +168,12 @@ export default function MessageBubble({ msg, onEdit }: Props) {
         ) : (
           textContent && (
             <div style={{
-              padding: '12px 16px',
+              padding: isUser ? '10px 16px' : '2px 0',
               borderRadius: isUser
                 ? (fileName ? '14px 14px 4px 14px' : '18px 18px 4px 18px')
-                : '18px 18px 18px 4px',
-              background: isUser ? 'var(--accent)' : 'var(--bg-tertiary)',
-              border: isUser ? 'none' : '1px solid var(--border)',
+                : '0',
+              background: isUser ? 'var(--user-bubble-bg)' : 'transparent',
+              border: 'none',
               fontSize: '14px', lineHeight: '1.7',
               color: 'var(--text-primary)',
               wordBreak: 'break-word', overflowWrap: 'break-word',
