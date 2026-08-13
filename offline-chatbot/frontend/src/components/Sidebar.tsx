@@ -25,6 +25,7 @@ interface Props {
 export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename, user, onLogout, onUpdateName, onUpdateUser }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [showSettings, setShowSettings] = useState(false)
   const [settingsTab, setSettingsTab] = useState<'profile' | 'memory'>('profile')
@@ -107,7 +108,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
         </div>
 
         {/* Sessions list */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+        <div onClick={() => setMenuOpenId(null)} style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
           {sessions.length === 0 && (
             <div style={{ padding: '20px 8px', color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center' }}>
               No chats yet
