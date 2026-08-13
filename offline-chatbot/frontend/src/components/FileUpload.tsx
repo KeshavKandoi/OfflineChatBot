@@ -10,7 +10,6 @@ export default function FileUpload({ onFileSelect }: Props) {
   function handleSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
     if (!f) return
-
     if (f.type.startsWith('image/')) {
       const reader = new FileReader()
       reader.onload = () => {
@@ -20,7 +19,6 @@ export default function FileUpload({ onFileSelect }: Props) {
     } else {
       onFileSelect(f, null)
     }
-
     if (ref.current) ref.current.value = ''
   }
 
@@ -37,19 +35,28 @@ export default function FileUpload({ onFileSelect }: Props) {
         onClick={() => ref.current?.click()}
         title="Attach file"
         style={{
-          padding: '10px 12px',
-          borderRadius: '10px',
-          background: 'var(--bg-tertiary)',
-          border: '1px solid var(--border)',
+          width: '34px', height: '34px',
+          borderRadius: '50%',
+          background: 'transparent',
+          border: 'none',
           color: 'var(--text-secondary)',
           cursor: 'pointer',
-          fontSize: '16px',
-          transition: 'all 0.15s'
+          fontSize: '20px',
+          fontWeight: 400,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+          transition: 'background 0.15s, color 0.15s'
         }}
-        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = 'var(--bg-hover)'
+          e.currentTarget.style.color = 'var(--text-primary)'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'transparent'
+          e.currentTarget.style.color = 'var(--text-secondary)'
+        }}
       >
-        📎
+        +
       </button>
     </>
   )
