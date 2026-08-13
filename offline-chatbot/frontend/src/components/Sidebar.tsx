@@ -100,7 +100,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
               width: '100%', marginTop: '10px', padding: '8px 12px',
               borderRadius: '8px', background: 'var(--bg-tertiary)',
               border: '1px solid var(--border)', color: 'var(--text-primary)',
-              fontSize: '13px', outline: 'none', fontFamily: 'DM Sans, sans-serif'
+              fontSize: '13px', outline: 'none', fontFamily: 'inherit'
             }}
             onFocus={e => e.target.style.borderColor = 'var(--accent)'}
             onBlur={e => e.target.style.borderColor = 'var(--border)'}
@@ -115,7 +115,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
             </div>
           )}
           {sessions.filter(s => s.title.toLowerCase().includes(search.toLowerCase())).map(s => (
-            <div key={s.id} style={{
+            <div key={s.id} className="chat-row" style={{
               padding: '10px 12px', borderRadius: '8px', cursor: 'pointer', marginBottom: '2px',
               background: activeId === s.id ? 'var(--bg-hover)' : 'transparent',
               borderLeft: activeId === s.id ? '2px solid var(--accent)' : '2px solid transparent',
@@ -136,11 +136,46 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
                     <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{new Date(s.created_at).toLocaleDateString()}</div>
                   </div>
-                  <div className="chat-actions" style={{ display: 'flex', gap: '4px', opacity: 0 }}>
-                    <button onClick={(e) => { e.stopPropagation(); startEdit(s) }}
-                      style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '14px', padding: '2px 4px' }} title="Rename">✎</button>
-                    <button onClick={(e) => { e.stopPropagation(); if (confirm('Delete this chat?')) onDelete(s.id) }}
-                      style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '14px', padding: '2px 4px' }} title="Delete">✕</button>
+
+                  <div className="chat-actions" style={{ position: 'relative', opacity: 0, flexShrink: 0 }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === s.id ? null : s.id) }}
+                      style={{
+                        background: 'none', border: 'none', color: 'var(--text-secondary)',
+                        cursor: 'pointer', fontSize: '16px', padding: '4px 6px', borderRadius: '6px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      }}
+                      title="More options"
+                    >⋮</button>
+
+                    {menuOpenId === s.id && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          position: 'absolute', top: '28px', right: 0, zIndex: 50,
+                          background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+                          borderRadius: '12px', padding: '6px', minWidth: '140px',
+                          boxShadow: 'var(--shadow-md)', display: 'flex', flexDirection: 'column', gap: '2px'
+                        }}
+                      >
+                        <button
+                          onClick={() => { startEdit(s); setMenuOpenId(null) }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '13px', padding: '9px 10px', borderRadius: '8px', textAlign: 'left', width: '100%' }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span>✎</span> Edit
+                        </button>
+                        <button
+                          onClick={() => { if (confirm('Delete this chat?')) onDelete(s.id); setMenuOpenId(null) }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '13px', padding: '9px 10px', borderRadius: '8px', textAlign: 'left', width: '100%' }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span>🗑</span> Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -189,17 +224,15 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
         }} onClick={() => setShowSettings(false)}>
           <div style={{
             background: 'var(--bg-primary)', borderRadius: '16px', width: '420px',
-            border: '1px solid var(--border)', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+            border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)',
             overflow: 'hidden'
           }} onClick={e => e.stopPropagation()}>
 
-            {/* Modal Header */}
             <div style={{ padding: '20px 24px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>Settings</div>
-              <button onClick={() => setShowSettings(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-muted)', lineHeight: 1 }}>×</button>
+              <button onClick={() => setShowSettings(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color:'var(--text-muted)', lineHeight: 1 }}>×</button>
             </div>
 
-            {/* Tabs */}
             <div style={{ display: 'flex', gap: '4px', padding: '16px 24px 0' }}>
               {(['profile', 'memory'] as const).map(tab => (
                 <button key={tab} onClick={() => setSettingsTab(tab)} style={{
@@ -213,11 +246,9 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
               ))}
             </div>
 
-            {/* Tab Content */}
             <div style={{ padding: '20px 24px 24px' }}>
               {settingsTab === 'profile' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {/* Photo */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ position: 'relative' }}>
                       {user.photo ? (
@@ -251,7 +282,6 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
                     <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
                   </div>
 
-                  {/* Name */}
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>DISPLAY NAME</label>
                     <input value={nameValue} onChange={e => setNameValue(e.target.value)}
@@ -260,7 +290,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
                         width: '100%', padding: '10px 12px', borderRadius: '8px',
                         background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
                         color: 'var(--text-primary)', fontSize: '14px', outline: 'none',
-                        fontFamily: 'DM Sans, sans-serif', boxSizing: 'border-box'
+                        fontFamily: 'inherit', boxSizing: 'border-box'
                       }}
                       onFocus={e => e.target.style.borderColor = 'var(--accent)'}
                       onBlur={e => e.target.style.borderColor = 'var(--border)'}
@@ -301,7 +331,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
                         width: '100%', padding: '10px 12px', borderRadius: '8px',
                         background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
                         color: 'var(--text-primary)', fontSize: '13px', outline: 'none',
-                        fontFamily: 'DM Sans, sans-serif', resize: 'vertical', boxSizing: 'border-box'
+                        fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box'
                       }}
                       onFocus={e => e.target.style.borderColor = 'var(--accent)'}
                       onBlur={e => e.target.style.borderColor = 'var(--border)'}
@@ -321,7 +351,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
       )}
 
       <style>{`
-        div:hover .chat-actions { opacity: 1 !important; }
+        .chat-row:hover .chat-actions { opacity: 1 !important; }
       `}</style>
     </>
   )
