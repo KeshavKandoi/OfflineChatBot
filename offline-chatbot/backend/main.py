@@ -316,17 +316,40 @@ def get_user_sessions(user_id: int, db: DBSession = Depends(get_db)):
 @app.post("/generate-title")
 async def generate_title(req: dict):
     message = req.get("message", "")
+
+    # Try Gemini first if online (kept as a best-effort enhancement)
     try:
-        from gemini_client import is_online, client
-        from google.genai import types
+        from gemini_client import is_online, _get_client
         if is_online():
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=f"Generate a short 4-5 word title for a chat that starts with this message. Reply with ONLY the title, no quotes, no punctuation at end:\n{message}"
-            )
-            return {"title": response.text.strip()}
-    except:
+            client = _get_client()
+            if client:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=f"Generate a short 2-4 word title summarizing the topic of a chat that starts with this message. Reply with ONLY the title, no quotes, no punctuation at end:\n{message}"
+                )
+                title = response.text.strip()
+                if title:
+                    return {"title": title}
+    except Exception:
         pass
-    # Fallback: use first 40 chars of message
+
+    # Local fallback: summarize with the offline Ollama model so titling
+    # always works, even fully offline (this is the primary path in practice).
+    try:
+        from ollama_client import model as local_model
+        prompt = (
+            "Summarize the topic of this message as a short chat title, "
+            "2-4 words, no quotes, no punctuation at the end. "
+            "If the message is just a greeting like 'hi' or 'hello', reply with 'Greeting'. "
+            f"Message: {message}"
+        )
+        response = local_model.invoke(prompt)
+        title = response.content.strip().strip('"').strip("'")
+        if title and len(title) < 60:
+            return {"title": title}
+    except Exception:
+        pass
+
+    # Last-resort fallback: raw truncated message
     title = message.strip()[:40] + ("..." if len(message) > 40 else "")
     return {"title": title}
