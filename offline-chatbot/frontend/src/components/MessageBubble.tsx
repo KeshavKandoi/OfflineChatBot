@@ -224,9 +224,11 @@ export default function MessageBubble({ msg, onEdit }: Props) {
           )
         )}
 
-        {!editing && hovered && (
+        {!editing && (
           <div style={{
-            display: 'flex', gap: '4px', marginTop: '2px',
+            display: 'flex', gap: '4px', marginTop: '2px', height: '26px',
+            opacity: hovered ? 1 : 0, pointerEvents: hovered ? 'auto' : 'none',
+            transition: 'opacity 0.15s',
             justifyContent: isUser ? 'flex-end' : 'flex-start'
           }}>
             <button onClick={handleCopy} style={{
