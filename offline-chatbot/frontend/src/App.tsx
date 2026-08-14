@@ -57,13 +57,21 @@ export default function App() {
     setMessages([])
   }
 
-  async function handleNew() {
+  // Clicking "New Chat" just clears the current view — no session is
+  // created in the database until the user actually sends a message.
+  function handleNew() {
+    setActiveId(null)
+    setMessages([])
+  }
+
+  // Called by ChatWindow the moment the user actually sends their first
+  // message with no active session (fresh page load or after "New Chat").
+  async function createSessionForFirstMessage() {
     const id = uuidv4()
     const title = 'New Chat'
     await createSession(id, title)
     await loadSessions()
     setActiveId(id)
-    setMessages([])
     return id
   }
 
@@ -131,7 +139,7 @@ export default function App() {
         sessionId={activeId}
         initialMessages={messages}
         onAutoTitle={handleAutoTitle}
-        onCreateSession={handleNew}
+        onCreateSession={createSessionForFirstMessage}
       />
     </div>
   )
