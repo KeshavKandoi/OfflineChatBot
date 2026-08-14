@@ -239,6 +239,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
           userScrolled.current = !isAtBottom
         }}
         style={{ flex: 1, overflowY: 'auto', padding: '24px 32px' }}>
+        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
         {messages.length === 0 && !streamingText && (
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -283,6 +284,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
         )}
 
         <div ref={bottomRef} />
+        </div>
       </div>
 
       {/* Input area */}
@@ -292,6 +294,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
         borderTop: '1px solid var(--border)',
         background: 'var(--bg-secondary)'
       }}>
+        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
         {attachedFile && (
           <div style={{
             display: 'inline-flex',
