@@ -9,10 +9,11 @@ interface Props {
   sessionId: string | null
   initialMessages: Message[]
   onAutoTitle?: (sessionId: string, firstMessage: string) => void
+  onCreateSession?: () => Promise<string>
   userMemory?: string
 }
 
-export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, userMemory = '' }: Props) {
+export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, onCreateSession, userMemory = '' }: Props) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
@@ -24,11 +25,8 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const userScrolled = useRef(false)
   const abortRef = useRef<(() => void) | null>(null)
+  const creatingSessionRef = useRef(false)
 
-  // ── Typewriter reveal buffer ──
-  // Raw chunks land here as fast as the network delivers them (bursty).
-  // A steady ticker below drains a few characters at a time so the UI
-  // always reads at a smooth, consistent pace regardless of burst size.
   const queueRef = useRef('')
   const finalizeRef = useRef<(() => void) | null>(null)
   const stoppedRef = useRef(false)
@@ -138,7 +136,21 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
   }
 
   async function send() {
-    if ((!input.trim() && !attachedFile) || !sessionId || streaming) return
+    if ((!input.trim() && !attachedFile) || streaming || creatingSessionRef.current) return
+
+    // Lazily create a session if none exists yet (e.g. right after a page
+    // refresh, before any chat has been selected or explicitly created).
+    let sid = sessionId
+    if (!sid) {
+      if (!onCreateSession) return
+      creatingSessionRef.current = true
+      try {
+        sid = await onCreateSession()
+      } finally {
+        creatingSessionRef.current = false
+      }
+      if (!sid) return
+    }
 
     let fileUploaded = false
     let uploadedFilename = ''
@@ -166,7 +178,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
 
     const userMsg: Message = {
       id: Date.now(),
-      session_id: sessionId,
+      session_id: sid,
       role: 'user',
       content: displayContent,
       created_at: new Date().toISOString()
@@ -175,8 +187,8 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
     const shouldAutoTitle = messages.filter(m => m.role === 'user').length <= 1
     userScrolled.current = false
     setMessages(prev => [...prev, userMsg])
-    if (shouldAutoTitle && sessionId && onAutoTitle) {
-      onAutoTitle(sessionId, input.trim() || uploadedFilename)
+    if (shouldAutoTitle && onAutoTitle) {
+      onAutoTitle(sid, input.trim() || uploadedFilename)
     }
     setInput('')
     setAttachedFile(null)
@@ -191,14 +203,14 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
     let fullText = ''
     abortRef.current = streamChat(
       fileUploaded ? ragText : input.trim(),
-      sessionId,
+      sid,
       (chunk) => { fullText += chunk; queueRef.current += chunk },
       (aborted) => {
         if (stoppedRef.current || aborted) return
         finalizeRef.current = () => {
           setMessages(msgs => [...msgs, {
             id: Date.now() + 1,
-            session_id: sessionId,
+            session_id: sid!,
             role: 'assistant',
             content: fullText,
             created_at: new Date().toISOString()
@@ -212,18 +224,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
       userMemory
     )
   }
-
-  if (!sessionId) return (
-    <div style={{
-      flex: 1, display: 'flex', alignItems: 'center',
-      justifyContent: 'center', flexDirection: 'column', gap: '12px'
-    }}>
-      <div style={{ fontSize: '32px' }}>💬</div>
-      <div style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
-        Select a chat or start a new one
-      </div>
-    </div>
-  )
 
   return (
     <div style={{
