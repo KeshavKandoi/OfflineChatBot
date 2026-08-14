@@ -31,6 +31,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
   // always reads at a smooth, consistent pace regardless of burst size.
   const queueRef = useRef('')
   const finalizeRef = useRef<(() => void) | null>(null)
+  const stoppedRef = useRef(false)
 
   useEffect(() => {
     let timer: number
@@ -76,6 +77,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
   }
 
   function stopStreaming() {
+    stoppedRef.current = true
     if (abortRef.current) {
       abortRef.current()
       abortRef.current = null
@@ -83,7 +85,18 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
     queueRef.current = ''
     finalizeRef.current = null
     setStreaming(false)
-    setStreamingText('')
+    setStreamingText(current => {
+      if (current.trim() && sessionId) {
+        setMessages(msgs => [...msgs, {
+          id: Date.now() + 1,
+          session_id: sessionId,
+          role: 'assistant',
+          content: current,
+          created_at: new Date().toISOString()
+        }])
+      }
+      return ''
+    })
   }
 
   function handleEdit(id: number, newContent: string) {
@@ -93,16 +106,18 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
       return updated.slice(0, idx + 1)
     })
     if (sessionId) {
+      stoppedRef.current = false
       setStreaming(true)
       setStreamingText('')
       queueRef.current = ''
       finalizeRef.current = null
       let fullText = ''
-      streamChat(
+      abortRef.current = streamChat(
         newContent,
         sessionId,
         (chunk) => { fullText += chunk; queueRef.current += chunk },
-        () => {
+        (aborted) => {
+          if (stoppedRef.current || aborted) return
           finalizeRef.current = () => {
             setMessages(msgs => [...msgs, {
               id: Date.now() + 1,
@@ -172,12 +187,14 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
     queueRef.current = ''
     finalizeRef.current = null
 
+    stoppedRef.current = false
     let fullText = ''
-    await streamChat(
+    abortRef.current = streamChat(
       fileUploaded ? ragText : input.trim(),
       sessionId,
       (chunk) => { fullText += chunk; queueRef.current += chunk },
-      () => {
+      (aborted) => {
+        if (stoppedRef.current || aborted) return
         finalizeRef.current = () => {
           setMessages(msgs => [...msgs, {
             id: Date.now() + 1,
