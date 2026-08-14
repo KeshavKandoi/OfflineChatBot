@@ -172,10 +172,10 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
       created_at: new Date().toISOString()
     }
 
-    const isFirstMessage = messages.length === 0
+    const shouldAutoTitle = messages.length <= 1
     userScrolled.current = false
     setMessages(prev => [...prev, userMsg])
-    if (isFirstMessage && sessionId && onAutoTitle) {
+    if (shouldAutoTitle && sessionId && onAutoTitle) {
       onAutoTitle(sessionId, input.trim() || uploadedFilename)
     }
     setInput('')
