@@ -42,29 +42,45 @@ export async function uploadFile(file: File) {
   return res.json()
 }
 
-export async function streamChat(
+// Returns a cancel() function so the caller can truly abort the in-flight
+// request (not just stop reading it) — used by the Stop button.
+export function streamChat(
   message: string,
   session_id: string,
   onChunk: (chunk: string) => void,
-  onDone: () => void,
+  onDone: (aborted: boolean) => void,
   has_file: boolean = false,
   filename: string = "",
   user_memory: string = ""
-) {
-  const res = await fetch(`${BASE}/chat/stream`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, session_id, has_file, filename, user_memory })
-  })
+): () => void {
+  const controller = new AbortController()
 
-  const reader = res.body!.getReader()
-  const decoder = new TextDecoder()
+  ;(async () => {
+    try {
+      const res = await fetch(`${BASE}/chat/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, session_id, has_file, filename, user_memory }),
+        signal: controller.signal
+      })
+      const reader = res.body!.getReader()
+      const decoder = new TextDecoder()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) { onDone(false); break }
+        onChunk(decoder.decode(value))
+      }
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        onDone(true)
+      } else {
+        console.error('Stream error:', err)
+        onDone(false)
+      }
+    }
+  })()
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) { onDone(); break }
-    onChunk(decoder.decode(value))
-  }
+  return () => controller.abort()
 }
 
 export async function generateTitle(message: string): Promise<string> {
