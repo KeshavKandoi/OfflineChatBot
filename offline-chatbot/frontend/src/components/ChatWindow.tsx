@@ -25,10 +25,36 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
   const userScrolled = useRef(false)
   const abortRef = useRef<(() => void) | null>(null)
 
+  // ── Typewriter reveal buffer ──
+  // Raw chunks land here as fast as the network delivers them (bursty).
+  // A steady ticker below drains a few characters at a time so the UI
+  // always reads at a smooth, consistent pace regardless of burst size.
+  const queueRef = useRef('')
+  const finalizeRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => {
+    let timer: number
+    function tick() {
+      if (queueRef.current.length > 0) {
+        const take = queueRef.current.slice(0, 3)
+        queueRef.current = queueRef.current.slice(3)
+        setStreamingText(prev => prev + take)
+      } else if (finalizeRef.current) {
+        const fn = finalizeRef.current
+        finalizeRef.current = null
+        fn()
+      }
+      timer = window.setTimeout(tick, 18)
+    }
+    timer = window.setTimeout(tick, 18)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     setMessages(initialMessages)
     setStreamingText('')
+    queueRef.current = ''
+    finalizeRef.current = null
   }, [sessionId, initialMessages])
 
   useEffect(() => {
@@ -54,37 +80,40 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
       abortRef.current()
       abortRef.current = null
     }
+    queueRef.current = ''
+    finalizeRef.current = null
     setStreaming(false)
     setStreamingText('')
   }
 
   function handleEdit(id: number, newContent: string) {
-    // Update the message content
     setMessages(prev => {
       const updated = prev.map(m => m.id === id ? { ...m, content: newContent } : m)
-      // Remove all messages after the edited message
       const idx = updated.findIndex(m => m.id === id)
       return updated.slice(0, idx + 1)
     })
-    // Resend to AI
     if (sessionId) {
       setStreaming(true)
       setStreamingText('')
+      queueRef.current = ''
+      finalizeRef.current = null
       let fullText = ''
       streamChat(
         newContent,
         sessionId,
-        (chunk) => { fullText += chunk; setStreamingText(fullText) },
+        (chunk) => { fullText += chunk; queueRef.current += chunk },
         () => {
-          setMessages(msgs => [...msgs, {
-            id: Date.now() + 1,
-            session_id: sessionId,
-            role: 'assistant',
-            content: fullText,
-            created_at: new Date().toISOString()
-          }])
-          setStreamingText('')
-          setStreaming(false)
+          finalizeRef.current = () => {
+            setMessages(msgs => [...msgs, {
+              id: Date.now() + 1,
+              session_id: sessionId,
+              role: 'assistant',
+              content: fullText,
+              created_at: new Date().toISOString()
+            }])
+            setStreamingText('')
+            setStreaming(false)
+          }
         },
         false,
         '',
@@ -105,19 +134,17 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
         await uploadFile(attachedFile)
         setUploadStatus('✓')
         fileUploaded = true
-        uploadedFilename = attachedFile.name  // capture filename before clearing state
+        uploadedFilename = attachedFile.name
       } catch {
         setUploadStatus('✗ Failed')
         return
       }
     }
 
-    // Encode file info into message so bubble can render it
     const displayContent = attachedFile
       ? `[File: ${attachedFile.name} | ${attachedPreview ?? 'none'}]${input.trim() ? '\n' + input.trim() : ''}`
       : input.trim()
 
-    // Build message text — include filename so context is clear
     const ragText = input.trim()
       ? `${input.trim()} [the user just uploaded this file: ${uploadedFilename}]`
       : `The user just uploaded a file called "${uploadedFilename}". Please analyze and explain its contents in detail.`
@@ -130,7 +157,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
       created_at: new Date().toISOString()
     }
 
-    // Auto-title on first message (check BEFORE adding to messages)
     const isFirstMessage = messages.length === 0
     userScrolled.current = false
     setMessages(prev => [...prev, userMsg])
@@ -143,25 +169,29 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
     setUploadStatus('')
     setStreaming(true)
     setStreamingText('')
+    queueRef.current = ''
+    finalizeRef.current = null
 
     let fullText = ''
     await streamChat(
       fileUploaded ? ragText : input.trim(),
       sessionId,
-      (chunk) => { fullText += chunk; setStreamingText(fullText) },
+      (chunk) => { fullText += chunk; queueRef.current += chunk },
       () => {
-        setMessages(msgs => [...msgs, {
-          id: Date.now() + 1,
-          session_id: sessionId,
-          role: 'assistant',
-          content: fullText,
-          created_at: new Date().toISOString()
-        }])
-        setStreamingText('')
-        setStreaming(false)
+        finalizeRef.current = () => {
+          setMessages(msgs => [...msgs, {
+            id: Date.now() + 1,
+            session_id: sessionId,
+            role: 'assistant',
+            content: fullText,
+            created_at: new Date().toISOString()
+          }])
+          setStreamingText('')
+          setStreaming(false)
+        }
       },
       fileUploaded,
-      uploadedFilename,   // pass filename to API
+      uploadedFilename,
       userMemory
     )
   }
@@ -183,7 +213,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
       flex: 1, display: 'flex', flexDirection: 'column', height: '100vh',
       background: 'var(--bg-primary)'
     }}>
-
       {/* Messages */}
       <div
         ref={messagesContainerRef}
@@ -219,7 +248,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
           />
         ))}
 
-        {/* Streaming bubble */}
         {streamingText && (
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px' }}>
             <div style={{
@@ -247,8 +275,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
         borderTop: '1px solid var(--border)',
         background: 'var(--bg-secondary)'
       }}>
-
-        {/* Attached file preview above input */}
         {attachedFile && (
           <div style={{
             display: 'inline-flex',
@@ -277,7 +303,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
                   : attachedFile.name.endsWith('.docx') ? '📝' : '📃'}
               </div>
             )}
-
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
                 fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)',
@@ -294,7 +319,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
                 {uploadStatus || `${(attachedFile.size / 1024).toFixed(1)} KB`}
               </div>
             </div>
-
             <button
               onClick={removeAttachment}
               style={{
@@ -316,14 +340,12 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
           </div>
         )}
 
-        {/* Input row */}
         <div style={{
           display: 'flex', gap: '8px', alignItems: 'center',
           background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
           borderRadius: '999px', padding: '6px 6px 6px 18px'
         }}>
           <FileUpload onFileSelect={handleFileSelect} />
-
           <textarea
             value={input}
             onChange={e => {
@@ -345,7 +367,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
               minHeight: '24px', maxHeight: '160px'
             }}
           />
-
           {streaming ? (
             <button
               onClick={stopStreaming}
@@ -381,7 +402,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
         </div>
       </div>
       )}
-
       <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
     </div>
   )
