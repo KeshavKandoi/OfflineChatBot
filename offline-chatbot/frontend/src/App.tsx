@@ -64,6 +64,7 @@ export default function App() {
     await loadSessions()
     setActiveId(id)
     setMessages([])
+    return id
   }
 
   async function handleSelect(id: string) {
@@ -130,6 +131,7 @@ export default function App() {
         sessionId={activeId}
         initialMessages={messages}
         onAutoTitle={handleAutoTitle}
+        onCreateSession={handleNew}
       />
     </div>
   )
