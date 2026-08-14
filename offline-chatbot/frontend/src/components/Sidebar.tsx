@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import type { ChatSession } from '../types'
 import ConfirmModal from './ConfirmModal'
-import { X, User as UserIcon, Brain, Camera, Trash2, Loader2, Check, AlertCircle, Lock } from 'lucide-react'
+import { X, User as UserIcon, Brain, Camera, Trash2, Loader2, Check, AlertCircle, Lock, Search } from 'lucide-react'
 
 interface User {
   id: number
@@ -155,23 +155,35 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
           >
             <span style={{ fontSize: '16px' }}>+</span> New Chat
           </button>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search chats..."
-            style={{
-              width: '100%', marginTop: '10px', padding: '8px 12px',
-              borderRadius: '8px', background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border)', color: 'var(--text-primary)',
-              fontSize: '13px', outline: 'none', fontFamily: 'inherit'
-            }}
-            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'}
-          />
+          <div style={{ position: 'relative', marginTop: '10px' }}>
+            <Search size={14} style={{
+              position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)',
+              color: 'var(--text-muted)', pointerEvents: 'none'
+            }} />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search chats..."
+              style={{
+                width: '100%', padding: '8px 12px 8px 32px',
+                borderRadius: '8px', background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)', color: 'var(--text-primary)',
+                fontSize: '13px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box'
+              }}
+              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            />
+          </div>
         </div>
 
         {/* Sessions list */}
         <div onClick={() => setMenuOpenId(null)} style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+          <div style={{
+            padding: '10px 12px 6px', fontSize: '11px', fontWeight: 600,
+            color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase'
+          }}>
+            Recents
+          </div>
           {sessions.length === 0 && (
             <div style={{ padding: '20px 8px', color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center' }}>
               No chats yet
@@ -269,7 +281,6 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
           )}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name}</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>@{user.username}</div>
           </div>
           <button onClick={(e) => { e.stopPropagation(); setConfirmLogout(true) }} title="Logout"
             style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '16px', padding: '4px', borderRadius: '6px', transition: 'all 0.15s' }}
@@ -373,8 +384,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
                     </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>{user.name}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>@{user.username}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>{user.name}</div>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button
                           onClick={() => fileInputRef.current?.click()}
