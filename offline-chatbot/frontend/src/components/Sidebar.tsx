@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import type { ChatSession } from '../types'
+import ConfirmModal from './ConfirmModal'
 
 interface User {
   id: number
@@ -26,6 +27,8 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
   const [editing, setEditing] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [confirmLogout, setConfirmLogout] = useState(false)
   const [search, setSearch] = useState('')
   const [showSettings, setShowSettings] = useState(false)
   const [settingsTab, setSettingsTab] = useState<'profile' | 'memory'>('profile')
@@ -167,7 +170,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
                           <span>✎</span> Edit
                         </button>
                         <button
-                          onClick={() => { if (confirm('Delete this chat?')) onDelete(s.id); setMenuOpenId(null) }}
+                          onClick={() => { setConfirmDeleteId(s.id); setMenuOpenId(null) }}
                           style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '13px', padding: '9px 10px', borderRadius: '8px', textAlign: 'left', width: '100%' }}
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -208,7 +211,7 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
             <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name}</div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>@{user.username}</div>
           </div>
-          <button onClick={(e) => { e.stopPropagation(); if (confirm('Log out?')) onLogout() }} title="Logout"
+          <button onClick={(e) => { e.stopPropagation(); setConfirmLogout(true) }} title="Logout"
             style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '16px', padding: '4px', borderRadius: '6px', transition: 'all 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color = 'var(--danger)'}
             onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
@@ -353,6 +356,32 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
       <style>{`
         .chat-row:hover .chat-actions { opacity: 1 !important; }
       `}</style>
+
+      <ConfirmModal
+        open={confirmDeleteId !== null}
+        title="Delete chat"
+        message="Are you sure you want to delete this chat? This can't be undone."
+        confirmLabel="Delete"
+        danger
+        onCancel={() => setConfirmDeleteId(null)}
+        onConfirm={() => {
+          if (confirmDeleteId) onDelete(confirmDeleteId)
+          setConfirmDeleteId(null)
+        }}
+      />
+
+      <ConfirmModal
+        open={confirmLogout}
+        title="Log out"
+        message="Are you sure you want to log out?"
+        confirmLabel="Log out"
+        danger
+        onCancel={() => setConfirmLogout(false)}
+        onConfirm={() => {
+          onLogout()
+          setConfirmLogout(false)
+        }}
+      />
     </>
   )
 }
