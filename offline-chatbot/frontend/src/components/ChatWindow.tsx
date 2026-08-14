@@ -172,7 +172,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, us
       created_at: new Date().toISOString()
     }
 
-    const shouldAutoTitle = messages.length <= 1
+    const shouldAutoTitle = messages.filter(m => m.role === 'user').length <= 1
     userScrolled.current = false
     setMessages(prev => [...prev, userMsg])
     if (shouldAutoTitle && sessionId && onAutoTitle) {
