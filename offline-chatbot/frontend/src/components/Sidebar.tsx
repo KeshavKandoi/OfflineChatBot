@@ -86,7 +86,6 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
         else updated.photo = pendingPhoto
       }
       onUpdateUser?.(updated)
-      onUpdateName(updated.name)
       setPendingPhoto(undefined)
       setSavingProfile(false)
       setProfileSaved(true)
