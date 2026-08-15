@@ -66,12 +66,15 @@ export default function App() {
 
   // Called by ChatWindow the moment the user actually sends their first
   // message with no active session (fresh page load or after "New Chat").
+  // Only the session-creation call is awaited (needed before /chat/stream
+  // can use the id) — the sidebar list reload happens in the background so
+  // it doesn't add extra latency before the user's message can be sent.
   async function createSessionForFirstMessage() {
     const id = uuidv4()
     const title = 'New Chat'
     await createSession(id, title)
-    await loadSessions()
     setActiveId(id)
+    loadSessions()
     return id
   }
 
