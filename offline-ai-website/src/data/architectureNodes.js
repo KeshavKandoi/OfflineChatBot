@@ -1,6 +1,7 @@
 export const ARCHITECTURE_NODES = [
   {
     id: "electron",
+    icon: "🖥️",
     label: "Electron",
     x: 50, y: 12,
     role: "Desktop shell",
@@ -9,6 +10,7 @@ export const ARCHITECTURE_NODES = [
   },
   {
     id: "react",
+    icon: "⚛️",
     label: "React + TypeScript",
     x: 82, y: 30,
     role: "Frontend UI",
@@ -17,6 +19,7 @@ export const ARCHITECTURE_NODES = [
   },
   {
     id: "fastapi",
+    icon: "⚡",
     label: "FastAPI",
     x: 50, y: 45,
     role: "Backend server",
@@ -25,6 +28,7 @@ export const ARCHITECTURE_NODES = [
   },
   {
     id: "ollama",
+    icon: "🦙",
     label: "Ollama",
     x: 18, y: 30,
     role: "Local inference engine",
@@ -33,6 +37,7 @@ export const ARCHITECTURE_NODES = [
   },
   {
     id: "sqlite",
+    icon: "🗄️",
     label: "SQLite",
     x: 20, y: 68,
     role: "Structured storage",
@@ -41,6 +46,7 @@ export const ARCHITECTURE_NODES = [
   },
   {
     id: "chromadb",
+    icon: "🧬",
     label: "ChromaDB",
     x: 50, y: 82,
     role: "Vector database",
@@ -49,6 +55,7 @@ export const ARCHITECTURE_NODES = [
   },
   {
     id: "langchain",
+    icon: "🔗",
     label: "LangChain / LangGraph",
     x: 80, y: 68,
     role: "Orchestration layer",
