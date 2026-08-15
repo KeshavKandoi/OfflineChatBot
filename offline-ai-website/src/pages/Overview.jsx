@@ -30,9 +30,7 @@ export default function Overview() {
           online mode.
         </p>
 
-        <div className="nx-hero-actions">
-          <a href="https://github.com/KeshavKandoi/OfflineChatBot" className="nx-btn-primary" target="_blank" rel="noreferrer">View Source</a>
-        </div>
+      
 
         <div className="nx-hero-stats">
           <div className="nx-hero-stat">
