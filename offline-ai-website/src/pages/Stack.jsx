@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { TECH_STACK } from "../data/techStack.js";
+import MiniCore from "../components/three/MiniCore.jsx";
 import "./Stack.css";
 
 const RADIUS_PERCENT = 42;
@@ -29,7 +30,7 @@ export default function Stack() {
       <div className="nx-orbit-wrap">
         <div className="nx-orbit-ring" />
         <div className="nx-orbit-center">
-          <span className="nx-orbit-center-mark">N</span>
+          <MiniCore />
           <span className="nx-orbit-center-label">NexaChat</span>
         </div>
 
