@@ -62,7 +62,7 @@ export default function ArchitectureMap() {
             onClick={() => setActiveId(activeId === node.id ? null : node.id)}
             aria-expanded={activeId === node.id}
           >
-            <span className="nx-arch-node-dot" />
+            <span className="nx-arch-node-dot">{node.icon}</span>
             <span className="nx-arch-node-label">{node.label}</span>
           </button>
         ))}
