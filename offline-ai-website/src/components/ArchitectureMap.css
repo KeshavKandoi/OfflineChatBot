@@ -12,6 +12,10 @@
   max-width: 760px;
   aspect-ratio: 1 / 0.9;
   margin: var(--nx-space-8) auto;
+  border: 1px dashed var(--nx-border-strong);
+  border-radius: var(--nx-radius-lg);
+  padding: var(--nx-space-6);
+  box-sizing: border-box;
 }
 
 .nx-arch-lines {
@@ -48,11 +52,15 @@
 }
 
 .nx-arch-node-dot {
-  width: 22px;
-  height: 22px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: var(--nx-bg-elevated);
-  border: 3px solid var(--nx-border-strong);
+  border: 2px solid var(--nx-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
   transition: border-color var(--nx-duration-fast), box-shadow var(--nx-duration-fast), transform var(--nx-duration-fast);
 }
 
@@ -86,33 +94,73 @@
   background: var(--nx-surface);
   border: 1px solid var(--nx-border);
   border-radius: var(--nx-radius-md);
-  padding: var(--nx-space-6) var(--nx-space-8);
+  padding: var(--nx-space-8);
   max-width: 640px;
   margin: 0 auto;
+  text-align: left;
+}
+
+.nx-arch-panel-head {
   text-align: center;
+  margin-bottom: var(--nx-space-6);
+  padding-bottom: var(--nx-space-6);
+  border-bottom: 1px solid var(--nx-border);
 }
 
 .nx-arch-panel-role {
   display: inline-block;
   font-size: var(--nx-text-xs);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--nx-accent);
   margin-bottom: var(--nx-space-2);
 }
 
-.nx-arch-panel h3 {
+.nx-arch-panel-head h3 {
   font-size: var(--nx-text-xl);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--nx-text-primary);
-  margin-bottom: var(--nx-space-3);
 }
 
-.nx-arch-panel p {
+.nx-arch-panel-section {
+  margin-bottom: var(--nx-space-5);
+}
+
+.nx-arch-panel-section:last-child {
+  margin-bottom: 0;
+}
+
+.nx-arch-panel-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--nx-text-faint);
+  margin-bottom: var(--nx-space-2);
+}
+
+.nx-arch-panel-section p {
   font-size: var(--nx-text-sm);
   color: var(--nx-text-secondary);
   line-height: 1.7;
+}
+
+.nx-arch-panel-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nx-arch-panel-chip {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--nx-radius-full);
+  background: var(--nx-bg-elevated);
+  border: 1px solid var(--nx-border);
+  color: var(--nx-text-secondary);
 }
 
 @media (max-width: 768px) {
