@@ -26,6 +26,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
   const userScrolled = useRef(false)
   const abortRef = useRef<(() => void) | null>(null)
   const creatingSessionRef = useRef(false)
+  const skipNextResetRef = useRef(false)
 
   const queueRef = useRef('')
   const finalizeRef = useRef<(() => void) | null>(null)
@@ -50,6 +51,10 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
   }, [])
 
   useEffect(() => {
+    if (skipNextResetRef.current) {
+      skipNextResetRef.current = false
+      return
+    }
     setMessages(initialMessages)
     setStreamingText('')
     queueRef.current = ''
@@ -138,18 +143,15 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
   async function send() {
     if ((!input.trim() && !attachedFile) || streaming || creatingSessionRef.current) return
 
-    // Lazily create a session if none exists yet (e.g. right after a page
-    // refresh, before any chat has been selected or explicitly created).
-    let sid = sessionId
-    if (!sid) {
+    const needsNewSession = !sessionId
+    let sidPromise: Promise<string | null> = Promise.resolve(sessionId)
+    if (needsNewSession) {
       if (!onCreateSession) return
       creatingSessionRef.current = true
-      try {
-        sid = await onCreateSession()
-      } finally {
-        creatingSessionRef.current = false
-      }
-      if (!sid) return
+      skipNextResetRef.current = true
+      sidPromise = onCreateSession()
+        .then(id => id)
+        .finally(() => { creatingSessionRef.current = false })
     }
 
     let fileUploaded = false
@@ -178,7 +180,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
 
     const userMsg: Message = {
       id: Date.now(),
-      session_id: sid,
+      session_id: sessionId || 'pending',
       role: 'user',
       content: displayContent,
       created_at: new Date().toISOString()
@@ -187,9 +189,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     const shouldAutoTitle = messages.filter(m => m.role === 'user').length <= 1
     userScrolled.current = false
     setMessages(prev => [...prev, userMsg])
-    if (shouldAutoTitle && onAutoTitle) {
-      onAutoTitle(sid, input.trim() || uploadedFilename)
-    }
     setInput('')
     setAttachedFile(null)
     setAttachedPreview(null)
@@ -198,6 +197,13 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     setStreamingText('')
     queueRef.current = ''
     finalizeRef.current = null
+
+    const sid = await sidPromise
+    if (!sid) { setStreaming(false); return }
+
+    if (shouldAutoTitle && onAutoTitle) {
+      onAutoTitle(sid, input.trim() || uploadedFilename)
+    }
 
     stoppedRef.current = false
     let fullText = ''
