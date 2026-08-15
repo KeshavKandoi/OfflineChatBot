@@ -31,15 +31,24 @@ export default function Overview() {
         </p>
 
         <div className="nx-hero-actions">
-          <a href="/downloads" className="nx-btn-primary">Download NexaChat</a>
-            <a
-            href="https://github.com/KeshavKandoi/OfflineChatBot"
-            className="nx-btn-secondary"
-            target="_blank"
-            rel="noreferrer"
-          >
-            View Source
-          </a>
+          <a href="https://github.com/KeshavKandoi/OfflineChatBot" className="nx-btn-primary" target="_blank" rel="noreferrer">View Source</a>
+        </div>
+
+        <div className="nx-hero-stats">
+          <div className="nx-hero-stat">
+            <span className="nx-hero-stat-value">3</span>
+            <span className="nx-hero-stat-label">Local models</span>
+          </div>
+          <div className="nx-hero-stat-divider" />
+          <div className="nx-hero-stat">
+            <span className="nx-hero-stat-value">0</span>
+            <span className="nx-hero-stat-label">Bytes sent to cloud</span>
+          </div>
+          <div className="nx-hero-stat-divider" />
+          <div className="nx-hero-stat">
+            <span className="nx-hero-stat-value">MIT</span>
+            <span className="nx-hero-stat-label">Open source license</span>
+          </div>
         </div>
       </div>
 
@@ -50,7 +59,7 @@ export default function Overview() {
     </section>
 
     <PipelineSection />
-    
+
     </>
   );
 }
