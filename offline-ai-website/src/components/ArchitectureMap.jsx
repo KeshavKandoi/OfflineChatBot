@@ -77,9 +77,24 @@ export default function ArchitectureMap() {
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="nx-arch-panel-role">{activeNode.role}</span>
-            <h3>{activeNode.label}</h3>
-            <p>{activeNode.detail}</p>
+            <div className="nx-arch-panel-head">
+              <span className="nx-arch-panel-role">{activeNode.role}</span>
+              <h3>{activeNode.label}</h3>
+            </div>
+
+            <div className="nx-arch-panel-section">
+              <span className="nx-arch-panel-label">Description</span>
+              <p>{activeNode.detail}</p>
+            </div>
+
+            <div className="nx-arch-panel-section">
+              <span className="nx-arch-panel-label">Connects to</span>
+              <div className="nx-arch-panel-chips">
+                {activeNode.connectsTo.map((name) => (
+                  <span key={name} className="nx-arch-panel-chip">{name}</span>
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
