@@ -5,6 +5,7 @@ export const ARCHITECTURE_NODES = [
     x: 50, y: 12,
     role: "Desktop shell",
     detail: "Launches on startup, spawns the bundled Ollama binary and the Python backend as child processes, then opens a window pointed at the built React frontend. Owns the app lifecycle and OS-level packaging for macOS and Windows.",
+    connectsTo: ["React + TypeScript", "Ollama", "FastAPI"],
   },
   {
     id: "react",
@@ -12,6 +13,7 @@ export const ARCHITECTURE_NODES = [
     x: 82, y: 30,
     role: "Frontend UI",
     detail: "Renders the chat interface, streams model output token by token via Server-Sent Events, and handles Markdown and syntax-highlighted code rendering with react-markdown and react-syntax-highlighter.",
+    connectsTo: ["Electron", "FastAPI"],
   },
   {
     id: "fastapi",
@@ -19,6 +21,7 @@ export const ARCHITECTURE_NODES = [
     x: 50, y: 45,
     role: "Backend server",
     detail: "The central Python server. Owns routing, session and message persistence, file uploads, and orchestrates calls to Ollama, ChromaDB, and the memory store through a LangGraph pipeline defined in graph.py.",
+    connectsTo: ["Electron", "React + TypeScript", "Ollama", "SQLite", "ChromaDB", "LangChain / LangGraph"],
   },
   {
     id: "ollama",
@@ -26,6 +29,7 @@ export const ARCHITECTURE_NODES = [
     x: 18, y: 30,
     role: "Local inference engine",
     detail: "Runs quantized language and vision models (qwen2.5, qwen2.5-coder, MiniCPM-V) entirely on-device. FastAPI talks to it over a local socket via the langchain-ollama integration.",
+    connectsTo: ["Electron", "FastAPI", "LangChain / LangGraph"],
   },
   {
     id: "sqlite",
@@ -33,6 +37,7 @@ export const ARCHITECTURE_NODES = [
     x: 20, y: 68,
     role: "Structured storage",
     detail: "Stores chat sessions and message history in a local .db file via SQLAlchemy models, giving the app persistent conversation history with zero external database dependency.",
+    connectsTo: ["FastAPI"],
   },
   {
     id: "chromadb",
@@ -40,6 +45,7 @@ export const ARCHITECTURE_NODES = [
     x: 50, y: 82,
     role: "Vector database",
     detail: "Stores document and memory embeddings locally on disk. Powers both document RAG (rag.py) and long-term conversational memory (long_memory.py) through semantic similarity search.",
+    connectsTo: ["FastAPI", "LangChain / LangGraph"],
   },
   {
     id: "langchain",
@@ -47,5 +53,6 @@ export const ARCHITECTURE_NODES = [
     x: 80, y: 68,
     role: "Orchestration layer",
     detail: "Coordinates the request pipeline: routing, retrieval, memory lookup, and context assembly are wired together as a graph in graph.py, giving the backend a clear, inspectable flow per request.",
+    connectsTo: ["FastAPI", "ChromaDB", "Ollama"],
   },
 ];
