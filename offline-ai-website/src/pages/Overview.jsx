@@ -2,7 +2,7 @@ import { useState } from "react";
 import ComputeCore from "../components/three/ComputeCore.jsx";
 import TerminalBoot from "../components/TerminalBoot.jsx";
 import PipelineSection from "../components/PipelineSection.jsx";
-import ArchitectureMap from "../components/ArchitectureMap.jsx";
+
 import "./Overview.css";
 
 export default function Overview() {
@@ -50,7 +50,7 @@ export default function Overview() {
     </section>
 
     <PipelineSection />
-    <ArchitectureMap />
+    
     </>
   );
 }
