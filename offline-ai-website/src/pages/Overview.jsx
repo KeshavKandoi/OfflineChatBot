@@ -10,8 +10,13 @@ export default function Overview() {
 
   return (
     <>
+
     <section className="nx-hero">
       <div className="nx-hero-copy">
+
+        <div class="container">
+        <h1>Introducing NexaChat</h1>
+        </div>
         <span className="nx-hero-eyebrow">
           <span className="nx-hero-eyebrow-dot" />
           Offline-first · No account · No cloud
@@ -21,6 +26,7 @@ export default function Overview() {
           Runs AI.<br />
           <em>Not the cloud.</em>
         </h1>
+        
 
         <p className="nx-hero-sub">
           NexaChat runs local language and vision models on your own machine
@@ -32,22 +38,7 @@ export default function Overview() {
 
       
 
-        <div className="nx-hero-stats">
-          <div className="nx-hero-stat">
-            <span className="nx-hero-stat-value">3</span>
-            <span className="nx-hero-stat-label">Local models</span>
-          </div>
-          <div className="nx-hero-stat-divider" />
-          <div className="nx-hero-stat">
-            <span className="nx-hero-stat-value">0</span>
-            <span className="nx-hero-stat-label">Bytes sent to cloud</span>
-          </div>
-          <div className="nx-hero-stat-divider" />
-          <div className="nx-hero-stat">
-            <span className="nx-hero-stat-value">MIT</span>
-            <span className="nx-hero-stat-label">Open source license</span>
-          </div>
-        </div>
+       
       </div>
 
       <div className="nx-hero-visual">
