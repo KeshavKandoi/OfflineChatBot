@@ -2,10 +2,10 @@
   position: relative;
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 1.05fr 0.95fr;
   align-items: center;
-  gap: var(--nx-space-8);
-  padding: var(--nx-space-10) var(--nx-space-10) var(--nx-space-8);
+  gap: var(--nx-space-6);
+  padding: var(--nx-space-8) var(--nx-space-10);
 }
 
 .nx-hero-copy {
