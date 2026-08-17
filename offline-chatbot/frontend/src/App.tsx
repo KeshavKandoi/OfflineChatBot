@@ -43,11 +43,6 @@ export default function App() {
     setUser(loggedInUser)
   }
 
-  function handleUpdateName(name: string) {
-    const updated = { ...user!, name }
-    localStorage.setItem("user", JSON.stringify(updated))
-    setUser(updated)
-  }
 
   function handleLogout() {
     localStorage.removeItem('user')
@@ -138,7 +133,6 @@ export default function App() {
         onRename={handleRename}
         user={user}
         onLogout={handleLogout}
-        onUpdateName={handleUpdateName}
         onUpdateUser={(u) => { localStorage.setItem("user", JSON.stringify(u)); setUser(u) }}
       />}
       <ChatWindow
