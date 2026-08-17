@@ -439,28 +439,6 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
           borderRadius: '999px', padding: '6px 6px 6px 18px'
         }}>
           <FileUpload onFileSelect={handleFileSelect} />
-          <button
-            type="button"
-            onClick={toggleRecording}
-            aria-label={isRecording ? 'Stop recording' : 'Voice input'}
-            style={{
-              width: '32px', height: '32px', borderRadius: '50%', border: 'none',
-              background: 'transparent',
-              color: isRecording ? '#ef4444' : 'var(--text-muted)',
-              flexShrink: 0, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              animation: isRecording ? 'nxMicPulseChat 1.2s ease-in-out infinite' : undefined
-            }}
-          >
-            <Mic size={17} />
-          </button>
-          <style>{`
-            @keyframes nxMicPulseChat {
-              0% { opacity: 1; }
-              50% { opacity: 0.4; }
-              100% { opacity: 1; }
-            }
-          `}</style>
           <textarea
             value={input}
             onChange={e => {
@@ -484,6 +462,28 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
               minHeight: '24px', maxHeight: '160px'
             }}
           />
+          <button
+            type="button"
+            onClick={toggleRecording}
+            aria-label={isRecording ? 'Stop recording' : 'Voice input'}
+            style={{
+              width: '32px', height: '32px', borderRadius: '50%', border: 'none',
+              background: 'transparent',
+              color: isRecording ? '#ef4444' : 'var(--text-muted)',
+              flexShrink: 0, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              animation: isRecording ? 'nxMicPulseChat 1.2s ease-in-out infinite' : undefined
+            }}
+          >
+            <Mic size={17} />
+          </button>
+          <style>{`
+            @keyframes nxMicPulseChat {
+              0% { opacity: 1; }
+              50% { opacity: 0.4; }
+              100% { opacity: 1; }
+            }
+          `}</style>
           {streaming ? (
             <button
               onClick={stopStreaming}
