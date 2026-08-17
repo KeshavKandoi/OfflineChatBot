@@ -20,13 +20,12 @@ interface Props {
   onRename: (id: string, title: string) => void
   user: User
   onLogout: () => void
-  onUpdateName: (name: string) => void
   onUpdateUser?: (user: User) => void
 }
 
 const MEMORY_MAX = 2000
 
-export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename, user, onLogout, onUpdateName, onUpdateUser }: Props) {
+export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename, user, onLogout, onUpdateUser }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
