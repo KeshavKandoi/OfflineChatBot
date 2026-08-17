@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface Props {
   onLogin: (user: { id: number; name: string; username: string; email: string }) => void
@@ -11,8 +11,6 @@ const FEATURES = [
 ]
 
 export default function Login({ onLogin }: Props) {
-  const [showSplash, setShowSplash] = useState(true)
-  const [splashFading, setSplashFading] = useState(false)
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -20,12 +18,6 @@ export default function Login({ onLogin }: Props) {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    const t1 = setTimeout(() => setSplashFading(true), 1100)
-    const t2 = setTimeout(() => setShowSplash(false), 1450)
-    return () => { clearTimeout(t1); clearTimeout(t2) }
-  }, [])
 
   function switchMode(m: 'login' | 'signup') {
     setMode(m)
@@ -79,45 +71,6 @@ export default function Login({ onLogin }: Props) {
     }
   }
 
-  if (showSplash) {
-    return (
-      <div style={{
-        height: '100vh',
-        width: '100vw',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'var(--bg-primary)',
-        fontFamily: 'DM Sans, sans-serif',
-        opacity: splashFading ? 0 : 1,
-        transition: 'opacity 0.35s ease'
-      }}>
-        <style>{`
-          @keyframes splashPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-            100% { transform: scale(1); }
-          }
-        `}</style>
-        <div style={{
-          width: '64px', height: '64px', borderRadius: '18px',
-          background: 'var(--accent)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center',
-          fontSize: '26px', fontWeight: 700, color: '#fff',
-          animation: 'splashPulse 1.2s ease-in-out infinite'
-        }}>
-          N
-        </div>
-        <div style={{
-          marginTop: '20px', fontSize: '17px', fontWeight: 700,
-          color: 'var(--text-primary)', letterSpacing: '-0.01em'
-        }}>
-          Nexachat
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div style={{
