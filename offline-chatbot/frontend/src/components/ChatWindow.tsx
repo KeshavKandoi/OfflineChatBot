@@ -389,7 +389,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
               e.target.style.height = 'auto'
               e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'
             }}
-            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())}
+            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && !streaming && (e.preventDefault(), send())}
             placeholder={attachedFile
               ? 'Ask about this file or press Send...'
               : 'Ask Nexa'}
