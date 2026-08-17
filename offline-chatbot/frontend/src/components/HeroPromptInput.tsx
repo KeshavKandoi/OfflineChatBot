@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MeshGradient } from "@paper-design/shaders-react";
 import { Mic, ArrowUp } from "lucide-react";
@@ -20,6 +20,77 @@ export default function HeroPromptInput({
   loading = false,
 }: HeroPromptInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [micSupported, setMicSupported] = useState(true);
+  const baseValueRef = useRef("");
+
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setMicSupported(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      let final = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+      if (final) {
+        baseValueRef.current = (baseValueRef.current + " " + final).trim();
+      }
+      const combined = (baseValueRef.current + " " + interim).trim();
+      onChange(combined);
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.stop();
+    };
+  }, []);
+
+  function toggleRecording() {
+    if (!micSupported || !recognitionRef.current) {
+      alert("Voice input isn't supported in this browser.");
+      return;
+    }
+
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      baseValueRef.current = value;
+      try {
+        recognitionRef.current.start();
+        setIsRecording(true);
+      } catch {
+        setIsRecording(false);
+      }
+    }
+  }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -46,7 +117,6 @@ export default function HeroPromptInput({
           style={{ width: "100%", height: "100%" }}
         />
       </div>
-
       <motion.div
         className="nx-hero-prompt-pill"
         initial={{ opacity: 0, y: 12 }}
@@ -61,19 +131,22 @@ export default function HeroPromptInput({
             autoResize();
           }}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={isRecording ? "Listening..." : placeholder}
           rows={1}
           className="nx-hero-prompt-textarea"
         />
-
         <button
           className="nx-hero-prompt-icon-btn"
-          aria-label="Voice input"
+          aria-label={isRecording ? "Stop recording" : "Voice input"}
           type="button"
+          onClick={toggleRecording}
+          style={{
+            color: isRecording ? "#ef4444" : undefined,
+            animation: isRecording ? "nxMicPulse 1.2s ease-in-out infinite" : undefined
+          }}
         >
           <Mic size={18} />
         </button>
-
         <AnimatePresence mode="wait">
           <motion.button
             key={loading ? "loading" : "send"}
@@ -91,6 +164,13 @@ export default function HeroPromptInput({
           </motion.button>
         </AnimatePresence>
       </motion.div>
+      <style>{`
+        @keyframes nxMicPulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.4; }
+          100% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
