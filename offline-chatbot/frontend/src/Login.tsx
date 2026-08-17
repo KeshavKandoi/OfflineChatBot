@@ -1,10 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Props {
   onLogin: (user: { id: number; name: string; username: string; email: string }) => void
 }
 
+const FEATURES = [
+  { title: 'Runs fully offline' },
+  { title: 'Private by design' },
+  { title: 'Persistent memory' },
+]
+
 export default function Login({ onLogin }: Props) {
+  const [showSplash, setShowSplash] = useState(true)
+  const [splashFading, setSplashFading] = useState(false)
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -12,6 +20,12 @@ export default function Login({ onLogin }: Props) {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setSplashFading(true), 1100)
+    const t2 = setTimeout(() => setShowSplash(false), 1450)
+    return () => { clearTimeout(t1); clearTimeout(t2) }
+  }, [])
 
   function switchMode(m: 'login' | 'signup') {
     setMode(m)
@@ -65,51 +79,99 @@ export default function Login({ onLogin }: Props) {
     }
   }
 
+  if (showSplash) {
+    return (
+      <div style={{
+        height: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--bg-primary)',
+        fontFamily: 'DM Sans, sans-serif',
+        opacity: splashFading ? 0 : 1,
+        transition: 'opacity 0.35s ease'
+      }}>
+        <style>{`
+          @keyframes splashPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+          }
+        `}</style>
+        <div style={{
+          width: '64px', height: '64px', borderRadius: '18px',
+          background: 'var(--accent)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center',
+          fontSize: '26px', fontWeight: 700, color: '#fff',
+          animation: 'splashPulse 1.2s ease-in-out infinite'
+        }}>
+          N
+        </div>
+        <div style={{
+          marginTop: '20px', fontSize: '17px', fontWeight: 700,
+          color: 'var(--text-primary)', letterSpacing: '-0.01em'
+        }}>
+          Nexachat
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={{
       height: '100vh',
+      width: '100vw',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       background: 'var(--bg-primary)',
       fontFamily: 'DM Sans, sans-serif',
-      padding: '20px',
-      boxSizing: 'border-box'
+      padding: '40px 24px',
+      boxSizing: 'border-box',
+      overflowY: 'auto',
+      animation: 'fadeIn 0.4s ease'
     }}>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+
       <div style={{
-        width: '400px',
+        width: '440px',
         maxWidth: '100%',
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border)',
-        borderRadius: '20px',
-        padding: '44px 40px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '22px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.35)'
+        alignItems: 'center',
+        gap: '28px'
       }}>
+
         <div style={{ textAlign: 'center' }}>
           <div style={{
             width: '52px', height: '52px', borderRadius: '14px',
             background: 'var(--accent)', display: 'flex',
             alignItems: 'center', justifyContent: 'center',
             fontSize: '20px', fontWeight: 700, color: '#fff',
-            margin: '0 auto 16px', letterSpacing: '-0.02em'
+            margin: '0 auto 18px'
           }}>
             N
           </div>
           <h1 style={{
-            fontSize: '24px', fontWeight: 700,
+            fontSize: '26px', fontWeight: 700,
             color: 'var(--text-primary)', margin: 0,
             letterSpacing: '-0.02em'
           }}>
-            Nexachat
+            {mode === 'login' ? 'Welcome back' : 'Create your account'}
           </h1>
           <p style={{
-            fontSize: '13.5px', color: 'var(--text-muted)',
-            marginTop: '6px'
+            fontSize: '14px', color: 'var(--text-muted)',
+            marginTop: '8px'
           }}>
-            {mode === 'login' ? 'Welcome back' : 'Create your account to get started'}
+            {mode === 'login' ? 'Log in to continue to Nexachat' : 'Start using Nexachat in seconds'}
           </p>
         </div>
 
@@ -117,7 +179,8 @@ export default function Login({ onLogin }: Props) {
           display: 'flex',
           background: 'var(--bg-tertiary)',
           borderRadius: '12px',
-          padding: '4px'
+          padding: '4px',
+          width: '100%'
         }}>
           {(['login', 'signup'] as const).map(m => (
             <button
@@ -137,7 +200,7 @@ export default function Login({ onLogin }: Props) {
           ))}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
 
           {mode === 'signup' && (
             <div>
@@ -197,12 +260,14 @@ export default function Login({ onLogin }: Props) {
 
         {error && (
           <div style={{
+            width: '100%',
             padding: '10px 14px',
             background: 'rgba(255,59,48,0.1)',
             border: '1px solid rgba(255,59,48,0.3)',
             borderRadius: '10px',
             fontSize: '13px',
-            color: '#ff3b30'
+            color: '#ff3b30',
+            boxSizing: 'border-box'
           }}>
             {error}
           </div>
@@ -212,6 +277,7 @@ export default function Login({ onLogin }: Props) {
           onClick={handleSubmit}
           disabled={loading}
           style={{
+            width: '100%',
             padding: '13px',
             borderRadius: '12px',
             border: 'none',
@@ -227,17 +293,21 @@ export default function Login({ onLogin }: Props) {
         </button>
 
         <div style={{
-          textAlign: 'center',
-          fontSize: '12px',
-          color: 'var(--text-muted)',
           display: 'flex', alignItems: 'center',
-          justifyContent: 'center', gap: '6px'
+          justifyContent: 'center', gap: '18px',
+          flexWrap: 'wrap'
         }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-          Your data never leaves your device
+          {FEATURES.map(f => (
+            <div key={f.title} style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              fontSize: '12px', color: 'var(--text-muted)'
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="3">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+              {f.title}
+            </div>
+          ))}
         </div>
       </div>
     </div>
