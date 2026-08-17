@@ -4,6 +4,7 @@ import { streamChat, uploadFile } from '../api'
 import MessageBubble from './MessageBubble'
 import FileUpload from './FileUpload'
 import HeroPromptInput from './HeroPromptInput'
+import { Mic } from 'lucide-react'
 
 interface Props {
   sessionId: string | null
@@ -21,12 +22,68 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
   const [attachedFile, setAttachedFile] = useState<File | null>(null)
   const [attachedPreview, setAttachedPreview] = useState<string | null>(null)
   const [uploadStatus, setUploadStatus] = useState('')
+  const [isRecording, setIsRecording] = useState(false)
+  const recognitionRef = useRef<any>(null)
+  const micBaseValueRef = useRef('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const userScrolled = useRef(false)
   const abortRef = useRef<(() => void) | null>(null)
   const creatingSessionRef = useRef(false)
   const skipNextResetRef = useRef(false)
+
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) return
+
+    const recognition = new SpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = 'en-US'
+
+    recognition.onresult = (event: any) => {
+      let interim = ''
+      let final = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          final += transcript
+        } else {
+          interim += transcript
+        }
+      }
+      if (final) {
+        micBaseValueRef.current = (micBaseValueRef.current + ' ' + final).trim()
+      }
+      setInput((micBaseValueRef.current + ' ' + interim).trim())
+    }
+
+    recognition.onerror = () => setIsRecording(false)
+    recognition.onend = () => setIsRecording(false)
+
+    recognitionRef.current = recognition
+    return () => recognition.stop()
+  }, [])
+
+  function toggleRecording() {
+    if (!recognitionRef.current) {
+      alert("Voice input isn't supported in this browser.")
+      return
+    }
+    if (isRecording) {
+      recognitionRef.current.stop()
+      setIsRecording(false)
+    } else {
+      micBaseValueRef.current = input
+      try {
+        recognitionRef.current.start()
+        setIsRecording(true)
+      } catch {
+        setIsRecording(false)
+      }
+    }
+  }
 
   const queueRef = useRef('')
   const finalizeRef = useRef<(() => void) | null>(null)
@@ -382,6 +439,28 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
           borderRadius: '999px', padding: '6px 6px 6px 18px'
         }}>
           <FileUpload onFileSelect={handleFileSelect} />
+          <button
+            type="button"
+            onClick={toggleRecording}
+            aria-label={isRecording ? 'Stop recording' : 'Voice input'}
+            style={{
+              width: '32px', height: '32px', borderRadius: '50%', border: 'none',
+              background: 'transparent',
+              color: isRecording ? '#ef4444' : 'var(--text-muted)',
+              flexShrink: 0, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              animation: isRecording ? 'nxMicPulseChat 1.2s ease-in-out infinite' : undefined
+            }}
+          >
+            <Mic size={17} />
+          </button>
+          <style>{`
+            @keyframes nxMicPulseChat {
+              0% { opacity: 1; }
+              50% { opacity: 0.4; }
+              100% { opacity: 1; }
+            }
+          `}</style>
           <textarea
             value={input}
             onChange={e => {
@@ -390,9 +469,11 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
               e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'
             }}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && !streaming && (e.preventDefault(), send())}
-            placeholder={attachedFile
-              ? 'Ask about this file or press Send...'
-              : 'Ask Nexa'}
+            placeholder={isRecording
+              ? 'Listening...'
+              : attachedFile
+                ? 'Ask about this file or press Send...'
+                : 'Ask Nexa'}
             rows={1}
             style={{
               flex: 1, padding: '10px 0', borderRadius: '0',
