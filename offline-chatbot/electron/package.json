@@ -34,6 +34,7 @@
     ],
     "mac": {
       "target": "dmg",
+      "icon": "icon.icns",
       "extraResources": [
         {
           "from": "binaries/mac",
