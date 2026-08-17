@@ -272,6 +272,16 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
           />
         ))}
 
+        {streaming && !streamingText && (
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', gap: '5px', padding: '4px 0' }}>
+              <span className="nx-thinking-dot" style={{ animationDelay: '0s' }} />
+              <span className="nx-thinking-dot" style={{ animationDelay: '0.15s' }} />
+              <span className="nx-thinking-dot" style={{ animationDelay: '0.3s' }} />
+            </div>
+          </div>
+        )}
+
         {streamingText && (
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px' }}>
             <div style={{
@@ -429,7 +439,18 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
         </div>
       </div>
       )}
-      <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
+      <style>{`
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .nx-thinking-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--text-muted);
+          animation: nx-thinking-bounce 1.1s infinite ease-in-out;
+        }
+        @keyframes nx-thinking-bounce {
+          0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+          30% { transform: translateY(-4px); opacity: 1; }
+        }
+      `}</style>
     </div>
   )
 }
