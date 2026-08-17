@@ -74,7 +74,11 @@ export default function App() {
     const title = 'New Chat'
     await createSession(id, title)
     setActiveId(id)
-    loadSessions()
+    // Add it to the sidebar locally instead of re-fetching the whole list —
+    // a background refetch here can race with the title-update refetch that
+    // follows shortly after (from auto-titling), and whichever resolves
+    // last wins, sometimes clobbering the real title back to "New Chat".
+    setSessions(prev => [{ id, title, created_at: new Date().toISOString() }, ...prev])
     return id
   }
 
