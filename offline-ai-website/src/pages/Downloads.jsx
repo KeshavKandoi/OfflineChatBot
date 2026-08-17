@@ -7,9 +7,9 @@ const RELEASES = {
     version: "1.0.1",
     arch: "Apple Silicon (M1/M2/M3/M4)",
     minOs: "macOS 13 or later",
-    size: "586 MB",
-    sha256: "8f2a1c9e6b3d47a0f5e2c8b91d6a4f7e3c0b9a2d5e8f1c4b7a0d3e6f9c2b5a8e",
-    url: "https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v1.0.1/Offline-AI-1.0.1-arm64.dmg",
+    size: "933 MB",
+    sha256: "a5714fefce528f6b2510f4214e9a36e7087e2ad77d30e17cf08e22199b43ee4b",
+    url: "https://github.com/KeshavKandoi/OfflineChatBot/releases/download/v1.0.1/Offline.AI-1.0.1-arm64.dmg",
     steps: [
       "Download the .dmg file",
       "Open it and drag NexaChat to Applications",
