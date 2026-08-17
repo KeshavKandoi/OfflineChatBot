@@ -33,6 +33,12 @@ export default function App() {
   useEffect(() => {
     if (user) loadSessions()
   }, [user])
+  useEffect(() => {
+    const savedId = localStorage.getItem('activeId')
+    if (savedId && sessions.some(s => s.id === savedId)) {
+      handleSelect(savedId)
+    }
+  }, [sessions])
 
   async function loadSessions() {
     const data = await getSessions()
@@ -69,6 +75,7 @@ export default function App() {
     const title = 'New Chat'
     await createSession(id, title)
     setActiveId(id)
+    localStorage.setItem('activeId', id)
     // Add it to the sidebar locally instead of re-fetching the whole list —
     // a background refetch here can race with the title-update refetch that
     // follows shortly after (from auto-titling), and whichever resolves
@@ -79,6 +86,7 @@ export default function App() {
 
   async function handleSelect(id: string) {
     setActiveId(id)
+    localStorage.setItem('activeId', id)
     const data = await getMessages(id)
     setMessages(data)
   }
@@ -88,6 +96,7 @@ export default function App() {
     if (activeId === id) {
       setActiveId(null)
       setMessages([])
+      localStorage.removeItem('activeId')
     }
     await loadSessions()
   }
