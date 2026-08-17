@@ -1,4 +1,5 @@
 
+import re
 import bcrypt
 from fastapi import FastAPI, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -103,25 +104,21 @@ def chat(req: ChatRequest, db: DBSession = Depends(get_db)):
 
 
 def stream_graph(req: ChatRequest, system_content: str, db: DBSession):
-    """Auto-switch: Gemini if online, Ollama if offline"""
     full_reply = []
 
     use_ollama = not is_online()
 
     if not use_ollama:
-        # ── Online: try Gemini first ───────────────────────────
         try:
             for token in stream_gemini(system_content, req.message):
                 full_reply.append(token)
                 yield token
         except Exception as e:
-            # Gemini failed (quota, error) → fallback to Ollama
             full_reply = []
             use_ollama = True
             yield "[Switching to offline mode...]\n"
 
     if use_ollama:
-        # ── Offline: use Ollama via LangGraph ──────────────────
         config = {"configurable": {"thread_id": req.session_id}}
         for chunk in graph.stream(
             {
@@ -140,7 +137,6 @@ def stream_graph(req: ChatRequest, system_content: str, db: DBSession):
 
     reply = "".join(full_reply)
 
-    # Save to DB
     db.add(Message(
         session_id=req.session_id,
         role="user",
@@ -161,7 +157,6 @@ def stream_graph(req: ChatRequest, system_content: str, db: DBSession):
 
 @app.post("/chat/stream")
 async def chat_stream(req: ChatRequest, db: DBSession = Depends(get_db)):
-    # Only use RAG if user actually uploaded a file with this message
     if req.has_file and req.filename:
         ext = req.filename.split(".")[-1].lower()
         if ext in ["jpg", "jpeg", "png"]:
@@ -173,7 +168,6 @@ async def chat_stream(req: ChatRequest, db: DBSession = Depends(get_db)):
     else:
         rag_context = []
 
-    # Load user long term memory
     user_memory = req.user_memory if hasattr(req, 'user_memory') and req.user_memory else ""
 
     system_content = (
@@ -232,39 +226,52 @@ def rag_search(query: str):
     return {"results": results}
 
 
-
-# ── Auth Models ──────────────────────────────────────────────
 class SignupRequest(BaseModel):
     name: str
-    username: str
-    email: str   
+    email: str
     password: str
 
 class LoginRequest(BaseModel):
     email: str
     password: str
 
-# ── Signup ────────────────────────────────────────────────────
+
+def generate_username(email: str, db: DBSession) -> str:
+    base = re.sub(r'[^a-zA-Z0-9]', '', email.split('@')[0]).lower() or "user"
+    username = base
+    counter = 1
+    while db.query(User).filter(User.username == username).first():
+        username = f"{base}{counter}"
+        counter += 1
+    return username
+
+
 @app.post("/auth/signup")
 def signup(req: SignupRequest, db: DBSession = Depends(get_db)):
-    existing = db.query(User).filter(User.username == req.username).first()
-    if existing:
-        return {"error": "Username already exists"}
+    name = req.name.strip()
+    email = req.email.strip().lower()
+    password = req.password
 
-    # Check email too
-    existing_email = db.query(User).filter(User.email == req.email).first()
+    if not name or not email or not password:
+        return {"error": "Please fill in all fields"}
+    if len(password) < 6:
+        return {"error": "Password must be at least 6 characters"}
+
+    existing_email = db.query(User).filter(User.email == email).first()
     if existing_email:
         return {"error": "Email already registered"}
 
+    username = generate_username(email, db)
+
     password_hash = bcrypt.hashpw(
-        req.password.encode('utf-8'),
+        password.encode('utf-8'),
         bcrypt.gensalt()
     ).decode('utf-8')
 
     user = User(
-        name=req.name,
-        username=req.username,
-        email=req.email,        # ← add this
+        name=name,
+        username=username,
+        email=email,
         password_hash=password_hash,
         created_at=datetime.utcnow()
     )
@@ -278,15 +285,14 @@ def signup(req: SignupRequest, db: DBSession = Depends(get_db)):
             "id": user.id,
             "name": user.name,
             "username": user.username,
-            "email": user.email    # ← add this
+            "email": user.email
         }
     }
 
-# ── Login ─────────────────────────────────────────────────────
+
 @app.post("/auth/login")
 def login(req: LoginRequest, db: DBSession = Depends(get_db)):
-    # Find user by email
-    user = db.query(User).filter(User.email == req.email).first()
+    user = db.query(User).filter(User.email == req.email.strip().lower()).first()
     if not user:
         return {"error": "Invalid email or password"}
 
@@ -306,7 +312,7 @@ def login(req: LoginRequest, db: DBSession = Depends(get_db)):
         }
     }
 
-# ── Get current user sessions ─────────────────────────────────
+
 @app.get("/sessions/user/{user_id}")
 def get_user_sessions(user_id: int, db: DBSession = Depends(get_db)):
     return db.query(Session).filter(
@@ -317,7 +323,6 @@ def get_user_sessions(user_id: int, db: DBSession = Depends(get_db)):
 async def generate_title(req: dict):
     message = req.get("message", "")
 
-    # Try Gemini first if online (kept as a best-effort enhancement)
     try:
         from gemini_client import is_online, _get_client
         if is_online():
@@ -333,8 +338,6 @@ async def generate_title(req: dict):
     except Exception:
         pass
 
-    # Local fallback: summarize with the offline Ollama model so titling
-    # always works, even fully offline (this is the primary path in practice).
     try:
         from ollama_client import model as local_model
         prompt = (
@@ -350,6 +353,5 @@ async def generate_title(req: dict):
     except Exception:
         pass
 
-    # Last-resort fallback: raw truncated message
     title = message.strip()[:40] + ("..." if len(message) > 40 else "")
     return {"title": title}
