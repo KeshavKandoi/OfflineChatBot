@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "com.keshav.offlineai",
-    "productName": "Offline AI",
+    "productName": "NexaChat",
     "files": [
       "main.js",
       "setup.html",
