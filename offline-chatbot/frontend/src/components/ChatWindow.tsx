@@ -4,6 +4,7 @@ import { streamChat, uploadFile } from '../api'
 import MessageBubble from './MessageBubble'
 import FileUpload from './FileUpload'
 import HeroPromptInput from './HeroPromptInput'
+import ReactMarkdown from 'react-markdown'
 import { Mic } from 'lucide-react'
 
 interface Props {
@@ -88,15 +89,17 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
   const queueRef = useRef('')
   const finalizeRef = useRef<(() => void) | null>(null)
   const stoppedRef = useRef(false)
+  const streamStartTimeRef = useRef(0)
 
   useEffect(() => {
     let timer: number
     function tick() {
-      if (queueRef.current.length > 0) {
+      const minDelayPassed = Date.now() - streamStartTimeRef.current >= 400
+      if (queueRef.current.length > 0 && minDelayPassed) {
         const take = queueRef.current.slice(0, 3)
         queueRef.current = queueRef.current.slice(3)
         setStreamingText(prev => prev + take)
-      } else if (finalizeRef.current) {
+      } else if (finalizeRef.current && (queueRef.current.length > 0 ? minDelayPassed : true)) {
         const fn = finalizeRef.current
         finalizeRef.current = null
         fn()
@@ -168,6 +171,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     if (sessionId) {
       stoppedRef.current = false
       setStreaming(true)
+      streamStartTimeRef.current = Date.now()
       setStreamingText('')
       queueRef.current = ''
       finalizeRef.current = null
@@ -251,6 +255,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     setAttachedPreview(null)
     setUploadStatus('')
     setStreaming(true)
+      streamStartTimeRef.current = Date.now()
     setStreamingText('')
     queueRef.current = ''
     finalizeRef.current = null
@@ -343,10 +348,47 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px' }}>
             <div style={{
               maxWidth: '100%', padding: '2px 0',
-              fontSize: '14px', lineHeight: '1.7', whiteSpace: 'pre-wrap',
-              color: 'var(--text-primary)'
+              fontSize: '14px', lineHeight: '1.7',
+              color: 'var(--text-primary)', width: '100%'
             }}>
-              {streamingText}
+              <ReactMarkdown
+                components={{
+                  code({ className, children }) {
+                    const isBlock = /language-(\w+)/.exec(className || '') || String(children).includes('\n')
+                    const codeStr = String(children).replace(/\n$/, '')
+                    if (isBlock) {
+                      return (
+                        <pre style={{
+                          background: '#0d0d1a', border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '10px', padding: '16px', overflowX: 'auto',
+                          margin: '12px 0', fontSize: '13px', lineHeight: '1.6'
+                        }}>
+                          <code style={{ fontFamily: 'monospace', color: '#e5e5e5' }}>{codeStr}</code>
+                        </pre>
+                      )
+                    }
+                    return (
+                      <code style={{
+                        background: 'rgba(124,106,247,0.15)',
+                        border: '1px solid rgba(124,106,247,0.25)',
+                        borderRadius: '4px', padding: '1px 6px',
+                        fontSize: '13px', fontFamily: 'monospace', color: '#a78bfa'
+                      }}>{children}</code>
+                    )
+                  },
+                  h1: ({ children }) => <h1 style={{ fontSize: '20px', fontWeight: 700, margin: '16px 0 8px' }}>{children}</h1>,
+                  h2: ({ children }) => <h2 style={{ fontSize: '17px', fontWeight: 600, margin: '14px 0 6px' }}>{children}</h2>,
+                  h3: ({ children }) => <h3 style={{ fontSize: '15px', fontWeight: 600, margin: '12px 0 4px' }}>{children}</h3>,
+                  p: ({ children }) => <p style={{ margin: '6px 0', lineHeight: '1.7', wordBreak: 'break-word' }}>{children}</p>,
+                  ul: ({ children }) => <ul style={{ paddingLeft: '20px', margin: '8px 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>{children}</ul>,
+                  ol: ({ children }) => <ol style={{ paddingLeft: '20px', margin: '8px 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>{children}</ol>,
+                  li: ({ children }) => <li style={{ lineHeight: '1.6' }}>{children}</li>,
+                  strong: ({ children }) => <strong style={{ fontWeight: 600 }}>{children}</strong>,
+                  em: ({ children }) => <em style={{ color: 'rgba(240,240,248,0.75)' }}>{children}</em>,
+                }}
+              >
+                {streamingText}
+              </ReactMarkdown>
               <span style={{
                 display: 'inline-block', width: '2px', height: '14px',
                 background: 'var(--accent)', marginLeft: '2px',
