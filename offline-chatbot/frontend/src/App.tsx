@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import type { ChatSession, Message } from './types'
 import { createSession, getSessions, getMessages, deleteSession, updateSessionTitle, generateTitle } from './api'
@@ -33,16 +33,20 @@ export default function App() {
   useEffect(() => {
     if (user) loadSessions()
   }, [user])
-  useEffect(() => {
-    const savedId = localStorage.getItem('activeId')
-    if (savedId && sessions.some(s => s.id === savedId)) {
-      handleSelect(savedId)
-    }
-  }, [sessions])
 
+
+  const hasRestoredRef = useRef(false)
   async function loadSessions() {
-    const data = await getSessions()
+    if (!user) return
+    const data = await getSessions(user.id)
     setSessions(data)
+    if (!hasRestoredRef.current) {
+      hasRestoredRef.current = true
+      const savedId = localStorage.getItem('activeId')
+      if (savedId && data.some((s: any) => s.id === savedId)) {
+        handleSelect(savedId)
+      }
+    }
   }
 
   async function handleLogin(loggedInUser: User) {
@@ -73,7 +77,7 @@ export default function App() {
   async function createSessionForFirstMessage() {
     const id = uuidv4()
     const title = 'New Chat'
-    await createSession(id, title)
+    await createSession(id, title, user!.id)
     setActiveId(id)
     localStorage.setItem('activeId', id)
     // Add it to the sidebar locally instead of re-fetching the whole list —
