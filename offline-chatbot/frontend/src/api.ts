@@ -1,16 +1,16 @@
 const BASE = 'http://127.0.0.1:8000'
 
-export async function createSession(id: string, title: string) {
+export async function createSession(id: string, title: string, user_id: number) {
   const res = await fetch(`${BASE}/sessions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, title })
+    body: JSON.stringify({ id, title, user_id })
   })
   return res.json()
 }
 
-export async function getSessions() {
-  const res = await fetch(`${BASE}/sessions`)
+export async function getSessions(userId: number) {
+  const res = await fetch(`${BASE}/sessions/user/${userId}`)
   return res.json()
 }
 
