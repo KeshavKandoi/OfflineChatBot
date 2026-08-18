@@ -110,13 +110,25 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     return () => clearTimeout(timer)
   }, [])
 
+  const activeSessionIdRef = useRef(sessionId)
+  useEffect(() => {
+    activeSessionIdRef.current = sessionId
+  }, [sessionId])
+
   useEffect(() => {
     if (skipNextResetRef.current) {
       skipNextResetRef.current = false
       return
     }
+    // Do NOT abort here — the backend only saves the message to the
+    // database after its response generator finishes. Aborting on switch
+    // would kill the request mid-stream and the answer would never be
+    // saved. Let it keep running in the background; when the user comes
+    // back to this session, handleSelect() refetches from the backend
+    // and picks up the saved result.
     setMessages(initialMessages)
     setStreamingText('')
+    setStreaming(false)
     queueRef.current = ''
     finalizeRef.current = null
   }, [sessionId, initialMessages])
@@ -272,9 +284,20 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     abortRef.current = streamChat(
       fileUploaded ? ragText : input.trim(),
       sid,
-      (chunk) => { fullText += chunk; queueRef.current += chunk },
+      (chunk) => {
+        fullText += chunk
+        // Only feed the visible typing animation if this stream's session
+        // is still the one on screen. The fetch keeps reading regardless,
+        // so the backend still gets the full response either way.
+        if (activeSessionIdRef.current === sid) {
+          queueRef.current += chunk
+        }
+      },
       (aborted) => {
-        if (stoppedRef.current || aborted) return
+        if (aborted) return
+        const isStillActive = activeSessionIdRef.current === sid
+        if (!isStillActive) return  // backend already persists it; a later handleSelect() will show it
+        if (stoppedRef.current) return
         finalizeRef.current = () => {
           setMessages(msgs => [...msgs, {
             id: Date.now() + 1,
