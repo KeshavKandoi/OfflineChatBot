@@ -13,12 +13,14 @@ interface Props {
   onAutoTitle?: (sessionId: string, firstMessage: string) => void
   onCreateSession?: () => Promise<string>
   userMemory?: string
+  onStreamingChange?: (active: boolean) => void
 }
 
-export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, onCreateSession, userMemory = '' }: Props) {
+export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, onCreateSession, userMemory = '', onStreamingChange }: Props) {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
+  const [globalBusy, setGlobalBusy] = useState(false)
   const [streamingText, setStreamingText] = useState('')
   const [attachedFile, setAttachedFile] = useState<File | null>(null)
   const [attachedPreview, setAttachedPreview] = useState<string | null>(null)
@@ -116,6 +118,10 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
   }, [sessionId])
 
   useEffect(() => {
+    onStreamingChange?.(streaming)
+  }, [streaming])
+
+  useEffect(() => {
     if (skipNextResetRef.current) {
       skipNextResetRef.current = false
       return
@@ -160,6 +166,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     queueRef.current = ''
     finalizeRef.current = null
     setStreaming(false)
+    setGlobalBusy(false)
     setStreamingText(current => {
       if (current.trim() && sessionId) {
         setMessages(msgs => [...msgs, {
@@ -183,6 +190,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     if (sessionId) {
       stoppedRef.current = false
       setStreaming(true)
+    setGlobalBusy(true)
       streamStartTimeRef.current = Date.now()
       setStreamingText('')
       queueRef.current = ''
@@ -204,6 +212,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
             }])
             setStreamingText('')
             setStreaming(false)
+            setGlobalBusy(false)
           }
         },
         false,
@@ -214,7 +223,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
   }
 
   async function send() {
-    if ((!input.trim() && !attachedFile) || streaming || creatingSessionRef.current) return
+    if ((!input.trim() && !attachedFile) || globalBusy || creatingSessionRef.current) return
 
     const needsNewSession = !sessionId
     let sidPromise: Promise<string | null> = Promise.resolve(sessionId)
@@ -273,7 +282,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     finalizeRef.current = null
 
     const sid = await sidPromise
-    if (!sid) { setStreaming(false); return }
+    if (!sid) { setStreaming(false); setGlobalBusy(false); return }
 
     if (shouldAutoTitle && onAutoTitle) {
       onAutoTitle(sid, input.trim() || uploadedFilename)
@@ -308,6 +317,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
           }])
           setStreamingText('')
           setStreaming(false)
+          setGlobalBusy(false)
         }
       },
       fileUploaded,
@@ -511,7 +521,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
               e.target.style.height = 'auto'
               e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'
             }}
-            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && !streaming && (e.preventDefault(), send())}
+            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && !globalBusy && (e.preventDefault(), send())}
             placeholder={isRecording
               ? 'Listening...'
               : attachedFile
@@ -565,15 +575,16 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
           ) : (
             <button
               onClick={send}
-              disabled={!input.trim() && !attachedFile}
+              disabled={(!input.trim() && !attachedFile) || globalBusy}
+              title={globalBusy ? 'Waiting for the current response to finish...' : undefined}
               style={{
                 width: '38px', height: '38px', borderRadius: '50%', border: 'none',
-                background: (!input.trim() && !attachedFile)
+                background: ((!input.trim() && !attachedFile) || globalBusy)
                   ? 'var(--bg-hover)' : 'var(--accent)',
-                color: (!input.trim() && !attachedFile)
+                color: ((!input.trim() && !attachedFile) || globalBusy)
                   ? 'var(--text-muted)' : '#fff', flexShrink: 0,
                 fontSize: '16px', fontWeight: 500,
-                cursor: (!input.trim() && !attachedFile) ? 'not-allowed' : 'pointer',
+                cursor: ((!input.trim() && !attachedFile) || globalBusy) ? 'not-allowed' : 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.15s'
               }}
