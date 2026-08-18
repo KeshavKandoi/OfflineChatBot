@@ -25,7 +25,16 @@
     "extraResources": [
       {
         "from": "../backend",
-        "to": "backend"
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!chat.db",
+          "!chatbot.db",
+          "!chroma_db/**",
+          "!uploads/**",
+          "!__pycache__/**",
+          "!*.db"
+        ]
       },
       {
         "from": "../frontend/dist",
