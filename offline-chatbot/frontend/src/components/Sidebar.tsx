@@ -21,11 +21,12 @@ interface Props {
   user: User
   onLogout: () => void
   onUpdateUser?: (user: User) => void
+  locked?: boolean
 }
 
 const MEMORY_MAX = 2000
 
-export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename, user, onLogout, onUpdateUser }: Props) {
+export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete, onRename, user, onLogout, onUpdateUser, locked = false }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
@@ -142,11 +143,16 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
           <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>
             Nexachat
           </div>
-          <button onClick={onNew} style={{
+          <button
+            onClick={() => { if (!locked) onNew() }}
+            disabled={locked}
+            title={locked ? 'Wait for the current response to finish' : undefined}
+            style={{
             width: '100%', padding: '10px 14px',
             background: 'var(--accent-dim)', border: '1px solid var(--accent)',
             borderRadius: '8px', color: 'var(--accent)',
-            fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+            fontSize: '13px', fontWeight: 500, cursor: locked ? 'not-allowed' : 'pointer',
+            opacity: locked ? 0.5 : 1,
             display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.15s'
           }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent)', e.currentTarget.style.color = '#fff')}
@@ -176,7 +182,16 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
         </div>
 
         {/* Sessions list */}
-        <div onClick={() => setMenuOpenId(null)} style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+        <div
+          onClick={() => setMenuOpenId(null)}
+          style={{
+            flex: 1, overflowY: 'auto', padding: '8px',
+            opacity: locked ? 0.5 : 1,
+            pointerEvents: locked ? 'none' : 'auto',
+            transition: 'opacity 0.15s'
+          }}
+          title={locked ? 'Wait for the current response to finish' : undefined}
+        >
           <div style={{
             padding: '10px 12px 6px', fontSize: '11px', fontWeight: 600,
             color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase'
