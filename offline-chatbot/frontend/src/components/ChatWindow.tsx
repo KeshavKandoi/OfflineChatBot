@@ -190,7 +190,7 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     if (sessionId) {
       stoppedRef.current = false
       setStreaming(true)
-    setGlobalBusy(true)
+      setGlobalBusy(true)
       streamStartTimeRef.current = Date.now()
       setStreamingText('')
       queueRef.current = ''
@@ -276,7 +276,8 @@ export default function ChatWindow({ sessionId, initialMessages, onAutoTitle, on
     setAttachedPreview(null)
     setUploadStatus('')
     setStreaming(true)
-      streamStartTimeRef.current = Date.now()
+    setGlobalBusy(true)
+    streamStartTimeRef.current = Date.now()
     setStreamingText('')
     queueRef.current = ''
     finalizeRef.current = null
