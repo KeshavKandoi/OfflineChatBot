@@ -44,6 +44,7 @@ class ChatRequest(BaseModel):
 class SessionCreate(BaseModel):
     id: str
     title: str
+    user_id: int | None = None
 
 @app.get("/health")
 def health():
@@ -51,7 +52,7 @@ def health():
 
 @app.post("/sessions")
 def create_session(data: SessionCreate, db: DBSession = Depends(get_db)):
-    session = Session(id=data.id, title=data.title, created_at=datetime.utcnow())
+    session = Session(id=data.id, title=data.title, user_id=data.user_id, created_at=datetime.utcnow())
     db.add(session)
     db.commit()
     db.refresh(session)
