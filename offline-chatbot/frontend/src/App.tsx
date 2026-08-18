@@ -21,6 +21,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
+  const [isGenerating, setIsGenerating] = useState(false)
 
   // Check if user is already logged in
   useEffect(() => {
@@ -147,6 +148,7 @@ export default function App() {
         user={user}
         onLogout={handleLogout}
         onUpdateUser={(u) => { localStorage.setItem("user", JSON.stringify(u)); setUser(u) }}
+        locked={isGenerating}
       />}
       <ChatWindow
         userMemory={user?.memory || ""}
@@ -154,6 +156,7 @@ export default function App() {
         initialMessages={messages}
         onAutoTitle={handleAutoTitle}
         onCreateSession={createSessionForFirstMessage}
+        onStreamingChange={setIsGenerating}
       />
     </div>
   )
